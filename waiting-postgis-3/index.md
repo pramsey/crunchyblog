@@ -15,10 +15,10 @@ Every tile generation query has to carry out the following steps:
 
 For PostGIS 3.0, performance of tile generation has been vastly improved.
 
-First, the clipping process has been sped up and made more reliable by integrating the [wagyu clipping algorithm](https://github.com/mapbox/wagyu) directly into PostGIS. This has sped up clipping of polygons in particular, and reduced instances of invalid output geometries. 
+* First, the clipping process has been sped up and made more reliable by integrating the [wagyu clipping algorithm](https://github.com/mapbox/wagyu) directly into PostGIS. This has sped up clipping of polygons in particular, and reduced instances of invalid output geometries. 
 
-Second, the simplification and precision reduction steps have been streamlined, to avoid unnecessary copying and work on simple cases like points and short lines. This has sped up handling of simple points and lines.
+* Second, the simplification and precision reduction steps have been streamlined, to avoid unnecessary copying and work on simple cases like points and short lines. This has sped up handling of simple points and lines.
 
-Finally, [ST_AsMVT()](https://postgis.net/docs/ST_AsMVT.html) aggregate itself has been made parallelizeable, so that all the work above can be parcelled out to multiple CPUs, dramatically speeding up generation of tiles with lots of input geometry.
+* Finally, [ST_AsMVT()](https://postgis.net/docs/ST_AsMVT.html) aggregate itself has been made parallelizeable, so that all the work above can be parcelled out to multiple CPUs, dramatically speeding up generation of tiles with lots of input geometry.
 
 PostGIS vector tile support has gotten so good that even projects with massive tile generation requirements, like the [OpenMapTiles](https://openmaptiles.org/) project, have standardized their tiling on PostGIS.
