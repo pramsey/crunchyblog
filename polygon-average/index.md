@@ -1,4 +1,4 @@
-# Polygon Overlay in PostGIS
+# Polygon Averaging in PostGIS
 
 The [GIS Stack Exchange](https://gis.stackexchange.com/) is a great repository of interesting questions and answers about how to work with spatial data, and with PostGIS.
 
