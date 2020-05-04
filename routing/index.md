@@ -174,6 +174,8 @@ While pulling the graph dynamically using SQL might seem like a performance drag
 
 The full user interface for the routing example is [available in GitHub](https://github.com/CrunchyData/pg_featureserv/blob/master/examples/openlayers-pgrouting.html).
 
+```<video autoplay loop><source src="img/routing.mp4" type="video/mp4"></video>```
+
 The key function of the interface just takes in the map clicks and mashes them into a URL that calls our `pg_featureserv` function endpoint, defined above:
 
 ```js
@@ -188,8 +190,6 @@ function routeUrl(coord1, coord2) {
 ```
 
 Since `pg_featureserv` publishes any table-returning function it finds in the `postgisftw` schema, we don't have to do anything other than turn on `pg_featureserv` and point it at our routing database to have the web serving online and ready for routing.
-
-```<video autoplay loop><source src="img/routing.mp4" type="video/mp4"></video>```
 
 The full directions for this example, and the example web page are all available in GitHub.
 
