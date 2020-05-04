@@ -106,7 +106,7 @@ PARALLEL SAFE;
 
 The PostGIS nearest-neighbor operator (`<->`) is used here to quickly find the nearest node point, and we restrict ourselves to only nodes that appear as sources or targets on edges.
 
-PgRouting offers [multiple core functions](https://docs.pgrouting.org/latest/en/routingFunctions.html), but for this example, we'll use the classic `pgr_dijkstra()`. Here's what our core routing query looks like:
+PgRouting offers [multiple core functions](https://docs.pgrouting.org/latest/en/routingFunctions.html), but for this example, we'll use the classic `pgr_dijkstra()` for [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm). Here's what our core routing query looks like:
 
 ```sql
  pgr_dijkstra(
