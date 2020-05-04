@@ -48,7 +48,7 @@ osm2pgrouting \
   --file Boston_MA.osm
 ```
 
-<img src='img/ways.png' />
+<img src="img/ways.png" />
 
 The loader tool creates three tables of data.
 
@@ -56,11 +56,11 @@ The loader tool creates three tables of data.
 
 * The **ways_vertices_pgr** which is a table of nodes where the edges join. Note that every node has an `id` number.
 
-<img src 'img/nodes.png' />
+<img src="img/nodes.png" />
 
 * The **ways** table, which is a table of road/path and other "movement" oriented edges.
 
-<img src 'img/ways-nodes.png' />
+<img src="img/ways-nodes.png" />
 
 Note that the ways table includes a `source` and `target` node identifier for each edge, so it's possible to traverse from node to node over the graph of edges. In the simplest form, PgRouting can walk any collection of records with a edge `id` column and `source` and `target` columns. 
 
@@ -75,7 +75,7 @@ We have all the pieces of a **routing engine** in place now in PostgreSQL:
 
 But in order to serve up a routing web application we need to bridge from the web site into the database server side. 
 
-<img src='img/crunchy-spatial.png' />
+<img src="img/crunchy-spatial.png" />
 
 [pg_tileserv](https://github.com/crunchydata/pg_tileserv) and [pg_featureserv](https://github.com/crunchydata/pg_featureserv) will be our bridge from the web client to the database. The tile service will allow us to visualize the ways table on the map, and the feature service will let us bind an HTTP end point to a user-defined function in PostgreSQL to run the routing query.
 
