@@ -150,7 +150,7 @@ CONTEXT:  PL/pgSQL function noded_road_trigger() line 13 at RAISE
 
 However, when we created this constraint trigger, we marked it as `DEFERRABLE`, for just this purpose. If we can get the database to wait until all the records are loaded before checking the constraint, our load will work.
 
-To defer the constraint, we use the `SET CONSTRAINTS` command at the start of our transaction.
+To defer the constraint, we use the [SET CONSTRAINTS](https://www.postgresql.org/docs/9.1/sql-set-constraints.html) command at the start of our transaction.
 
 ```sql
 BEGIN;
@@ -160,7 +160,9 @@ INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 2 0)');
 COMMIT;
 ```
 
-Success! So, we can ensure noding. But can we also ensure connectivity? It would seem so, if every segment must connect to another segment, but it's actually quite easy to break connectivity: just insert a self-connected group of segments in one deferred transaction.
+Success! So, we can ensure noding. 
+
+But can we also ensure connectivity? It would seem so, if every segment must connect to another segment, but it's actually quite easy to break connectivity: just insert a self-connected group of segments in one deferred transaction.
 
 ```sql
 BEGIN;
@@ -176,9 +178,11 @@ DELETE FROM roads WHERE pk IN (7, 8);
 
 <img src="img/network3.png" />
 
+Oh no, it's very easy insert "islands" of separate noded segments into our table. We need a new constraint to check that all the segments are connected together globally.
+
 ### Tablewide Constraints
 
-There's no reason we cannot test connectivity, but unfortunately it is an expensive operation. We've already guaranteed noding, with the `noded_road_trigger()`, so we just need to ensure that all the noded segments form a single graph, and we can do that using [spatial clustering](https://postgis.net/docs/ST_ClusterDBSCAN.html) with zero tolerance.
+We've already guaranteed noding, with the `noded_road_trigger()`, so we just need to ensure that all the noded segments form a single graph, and we can do that using [spatial clustering](https://postgis.net/docs/ST_ClusterDBSCAN.html) with zero tolerance.
 
 ```sql
 CREATE OR REPLACE FUNCTION single_network_trigger()
@@ -233,4 +237,16 @@ CONTEXT:  PL/pgSQL function single_network_trigger() line 15 at RAISE
 ```
 
 The downside of this approach should be obvious: for larger tables, the cost of checking the cluster on each data update will become hard on performance. However, for smaller tables in the 10s of thousands of records, it should work fine.
+
+### More Constraints?
+
+Once you get started, it's easy to imagine other constraints, and more complex ones.
+
+* Ensure all polygons inserted in a table are valid, using a constraint on [ST_IsValid()](https://postgis.net/docs/ST_IsValid.html).
+* Ensure that polygons inserted in a table do not have any overlaps, a common restriction for parcels and other cadastral data, using [ST_Relate()](https://postgis.net/docs/ST_Relate.html)
+* Ensure that all points in an address table fall within a valid polygon, using [ST_Contains()](https://postgis.net/docs/ST_Contains.html)
+
+Remember, you can enforce data validity in your application if you like, but only so long as the number of applications you have writing to your database is **one**. Look at database constraints, they might save you a world of hurt!
+
+
 
