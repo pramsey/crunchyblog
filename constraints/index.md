@@ -11,6 +11,8 @@ Why enforce data quality rules in the database, and not at the application tier?
 
 If you are lucky enough to write a system successful enough to be in production for more than a couple years, the odds of multiple write applications proliferating rapidly converge to 100%. Enforcing core data quality rules in the database is a nice way to ground your system with solid assumptions about data integrity.
 
+Our interactive learning portal has a [whole section on the use of non-spatial constraints](https://learn.crunchydata.com/postgresql-devel/courses/basics/constraints), if you're interested.
+
 What about spatial, though? Thanks to the magic of PostgreSQL run-time extensions, the `geometry` type is just another type and all the machinery of constraint checking works just as well for `geometry` as any other type.
 
 Here are a few examples of simple and complex constraints that spatial database users like to enforce on the geometry data.
