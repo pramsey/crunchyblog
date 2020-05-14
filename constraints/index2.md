@@ -12,7 +12,7 @@ Parcels are form of "cadastre", a spatial layer that reflects the legal subdivis
 
 There are two ways for parcels to break the rule.
 
-<img src="img/invalid.png" />
+<img src="img/parcel-overlap.png" />
 
 * A parcel can partially overlap another parcel, like the red parcel on the lower right. 
 * A parcel can be fully contained with another parcel, like the red parcel on the left.
