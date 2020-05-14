@@ -1,21 +1,10 @@
-# Spatial Constraints with PostGIS
+# Spatial Constraints with PostGIS - Part 3
 
-Constraints are used to ensure that data in the database reflects the assumptions of the data model.
+If constraints in general have caught your interest, our interactive learning portal has a [whole section on the use of non-spatial constraints](https://learn.crunchydata.com/postgresql-devel/courses/basics/constraints), even a [video](https://www.youtube.com/watch?v=MAZ4EM8Up8w) walkthrough!
 
-* Do foreign keys match up to corresponding keys? (`REFERENCES`)
-* Are mandatory columns filled in? (`NOT NULL`)
-* Are unique values columns in fact unique? (`UNIQUE`)
-* Do other data quality rules pass? (`CHECK`)
+In our last installment, we covered the use of a [constraint trigger](https://www.postgresql.org/docs/current/sql-createtrigger.html) to enforce data quality by looking at geometry spatial relationships.
 
-Why enforce data quality rules in the database, and not at the application tier? Because if you qualify all your data at the application tier, you have to duplicate **all that logic** whenever you add **another application** that writes to the database. 
-
-If you are lucky enough to write a system successful enough to be in production for more than a couple years, the odds of multiple write applications proliferating rapidly converge to 100%. Enforcing core data quality rules in the database is a nice way to ground your system with solid assumptions about data integrity.
-
-Our interactive learning portal has a [whole section on the use of non-spatial constraints](https://learn.crunchydata.com/postgresql-devel/courses/basics/constraints), if you're interested. There's also a [video](https://www.youtube.com/watch?v=MAZ4EM8Up8w).
-
-What about spatial, though? Thanks to the magic of PostgreSQL run-time extensions, the `geometry` type is just another type and all the machinery of constraint checking works just as well for `geometry` as any other type.
-
-Here are a few examples of simple and complex constraints that spatial database users like to enforce on the geometry data.
+For this installment, we'll start with basic relationships and then look at more complex use cases: deferred constraints, and full table-level data structures.
 
 ## Linear Network Constraints
 
@@ -31,9 +20,9 @@ CREATE TABLE roads (
 );
 ```
 
-### Check Constraints
+## Check Constraints
 
-PostgreSQL column level constraints can only operate on the incoming value, so we are restricted to some very low-level tests of data quality: 
+We've added a couple simple check constraints in the table definition:
 
 * we want our road segments to have a non-zero length; and,
 * we want our road segments to have no self-intersections, to be "simple".
@@ -56,7 +45,7 @@ ERROR:  new row for relation "roads" violates check constraint "geom_no_self_int
 DETAIL:  Failing row contains (1, Elm, 0102000020BD0B00000400000000000000000000000000000000000000000000...).
 ```
 
-### Trigger Constraints
+## Trigger Constraints
 
 However, the real restriction that most spatial users want to enforce for linear network data is connectivity. In particular, they like it when:
 
@@ -129,7 +118,7 @@ This is interesting. One failed, and the other succeeded, why? Because while the
 
 <img src="img/network2.png" />
 
-### Deferring Constraints
+## Deferring Constraints
 
 The two segments have to both be in place in order to evaluate the connectivity. Maybe if we put them both in a transaction block, things will work better?
 
@@ -182,7 +171,7 @@ DELETE FROM roads WHERE pk IN (7, 8);
 
 Oh no, it's very easy insert "islands" of separate noded segments into our table. We need a new constraint to check that all the segments are connected together globally.
 
-### Tablewide Constraints
+## Table-wide Constraints
 
 We've already guaranteed noding, with the `noded_road_trigger()`, so we just need to ensure that all the noded segments form a single graph, and we can do that using [spatial clustering](https://postgis.net/docs/ST_ClusterDBSCAN.html) with zero tolerance.
 
@@ -244,11 +233,6 @@ The downside of this approach should be obvious: for larger tables, the cost of 
 
 Once you get started, it's easy to imagine other constraints, and more complex ones.
 
-* Ensure all polygons inserted in a table are valid, using a constraint on [ST_IsValid()](https://postgis.net/docs/ST_IsValid.html).
-* Ensure that polygons inserted in a table do not have any overlaps, a common restriction for parcels and other cadastral data, using [ST_Relate()](https://postgis.net/docs/ST_Relate.html)
-* Ensure that all points in an address table fall within a valid polygon, using [ST_Contains()](https://postgis.net/docs/ST_Contains.html)
-
 Remember, you can enforce data validity in your application if you like, but only so long as the number of applications you have writing to your database is **one**. Look at database constraints, they might save you a world of hurt!
 
-
-
+If constraints in general have caught your interest, our interactive learning portal has a [whole section on the use of non-spatial constraints](https://learn.crunchydata.com/postgresql-devel/courses/basics/constraints), even a [video](https://www.youtube.com/watch?v=MAZ4EM8Up8w) walkthrough!
