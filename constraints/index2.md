@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION overlapping_parcel_trigger()
   LANGUAGE 'plpgsql';
 ```
 
-This query looks for parcels that share area. If there are more than zero parcels sharing area, we have a problem, so we raise an exception to abort the transaction.
+The query inside this trigger looks for parcels that share area. If there are more than zero parcels sharing area, we have a problem, so we raise an exception to abort the transaction.
 
 Note the three `WHERE` clauses:
 
@@ -96,19 +96,21 @@ Fortunately there's a form of [ST_Relate](https://postgis.net/docs/ST_Relate.htm
 ST_Relate(parcels.geom, NEW.geom, '2********')
 ```
 
-The three-parameter form of [ST_Relate](https://postgis.net/docs/ST_Relate.html) tests the relate matrix for the two geometry parameters against the string parameter, and returns `true` if the pattern is consistent, where the glob "*" matches any cell value. So this pattern "2********" matches any relate where the I/I cell is "2".
+The three-parameter form of [ST_Relate](https://postgis.net/docs/ST_Relate.html) tests the relate matrix for the two geometry parameters against the string parameter, and returns `true` if the pattern is consistent, where the glob "*" matches any cell value. So the pattern "2********" matches any relate where the I/I cell is "2".
 
 ## Constraint Trigger
 
 To enable parcel overlap checking on our parcels table, we need to associate the trigger function with an actual trigger.
 
 ```sql
+-- create our table
 CREATE TABLE parcels (
    pk bigint PRIMARY KEY,
    geom geometry(Polygon, 3005) 
       NOT NULL CHECK (ST_IsValid(geom))
 );
 
+-- add the constraint trigger
 CREATE CONSTRAINT TRIGGER overlapping_parcel 
     AFTER INSERT OR UPDATE ON parcels
     FOR EACH ROW EXECUTE FUNCTION overlapping_parcel_trigger();
@@ -124,7 +126,7 @@ INSERT INTO parcels VALUES (3, 'POLYGON((200 100, 300 100, 300 0, 200 0, 200 100
 
 No errors! 
 
-<img src="img/de9im-cover.png" />
+<img src="img/parcel-overlap2.png" />
 
 Now insert an overlapping parcel:
 
