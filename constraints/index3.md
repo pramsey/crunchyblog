@@ -114,7 +114,7 @@ INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 2 0)');
 INSERT 0 1
 ```
 
-This is interesting. One failed, and the other succeeded, why? Because while they **together** are connected, the "Oak" segment need to be inserted before the "Larch" segment can connect to it.
+This is interesting. One failed, and the other succeeded, why? Because while they **together** are connected, the "Oak" segment needs to be inserted **before** the "Larch" segment can connect to it.
 
 <img src="img/network2.png" />
 
@@ -152,6 +152,8 @@ COMMIT;
 ```
 
 Success! So, we can ensure noding. 
+
+## Enforcing Connectivity
 
 But can we also ensure connectivity? It would seem so, if every segment must connect to another segment, but it's actually quite easy to break connectivity: just insert a self-connected group of segments in one deferred transaction.
 
