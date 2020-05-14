@@ -8,7 +8,7 @@ However, spatial data quality usually involves higher order relationships betwee
 
 ## Trigger Constraints
 
-Parcels are form of "cadastre", a spatial layer that reflects the legal subdivision of land. One of the core business rules of parcels is that not piece of land can be in two parcels at once.
+Parcels are form of "cadastre", a spatial layer that reflects the legal subdivision of land. One of the core business rules of parcels is that no piece of land may be in two parcels at once.
 
 There are two ways for parcels to break the rule.
 
