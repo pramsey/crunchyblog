@@ -231,7 +231,21 @@ CONTEXT:  PL/pgSQL function single_network_trigger() line 15 at RAISE
 
 The downside of this approach should be obvious: for larger tables, the cost of checking the cluster on each data update will become hard on performance. However, for smaller tables in the 10s of thousands of records, it should work fine.
 
-### More Constraints?
+## Exclusion Constraints?
+
+[Exclusion constraints](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-EXCLUSION) are not very useful with PostGIS, because of the way PostGIS spatial operators are implemented. 
+
+Exclusion constraints are strictly limited to enforcing conditions defined using index operators, and unfortunately the PostGIS operators all work with "bounding box logic" not "geometry logic". For example:
+
+```sql
+SELECT 'LINESTRING(0 0 10 10)'::geometry && 'POINT(5 4)';
+```
+
+Returns **TRUE**, because it tests if the bounding box of the linestring and the bounding box of the point intersect. 
+
+An exclusion constraint to "only allow new geometries that do not intersect existing geometries" might be useful. But it cannot be implemented with the PostGIS **&&** operator.
+
+## More Constraints?
 
 Once you get started, it's easy to imagine other constraints, and more complex ones.
 
