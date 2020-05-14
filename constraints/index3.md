@@ -1,7 +1,5 @@
 # Spatial Constraints with PostGIS - Part 3
 
-If constraints in general have caught your interest, our interactive learning portal has a [whole section on the use of non-spatial constraints](https://learn.crunchydata.com/postgresql-devel/courses/basics/constraints), even a [video](https://www.youtube.com/watch?v=MAZ4EM8Up8w) walkthrough!
-
 In our last installment, we covered the use of a [constraint trigger](https://www.postgresql.org/docs/current/sql-createtrigger.html) to enforce data quality by looking at geometry spatial relationships.
 
 For this installment, we'll start with basic relationships and then look at more complex use cases: deferred constraints, and full table-level data structures.
