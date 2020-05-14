@@ -52,9 +52,11 @@ Note the three `WHERE` clauses:
 * Then a primary key check to exclude the case where a parcel overlaps with itself.
 * Finally a call to the [ST_Relate](https://postgis.net/docs/ST_Relate.html) function to check if the relationship between the geometries includes sharing of area.
 
-The [ST_Relate](https://postgis.net/docs/ST_Relate.html) computes the "dimensionally extended 9-intersection model" (DE9IM) for the two input geometries. 
+We cannot use a simple call to [ST_Overlaps](https://postgis.net/docs/ST_Overlaps.html)to test for sharing of area, because "overlaps" only tests for the case where polygons are overlapping but not contained (the polygon on the right).
 
 ## Dimensionally Extended 9-Intersection Model (DE9IM)
+
+The [ST_Relate](https://postgis.net/docs/ST_Relate.html) computes the "dimensionally extended 9-intersection model" (DE9IM) for the two input geometries. 
 
 The DE9IM **exactly** describes the relationship between two geometries. 
 
