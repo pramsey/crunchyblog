@@ -89,9 +89,9 @@ CREATE CONSTRAINT TRIGGER noded_road
 We'll start with a small seed network, that looks like this:
 
 ```sql
-INSERT INTO roads VALUES (2, 'Grand', 'LINESTRING(0 0, 0 2, 2 2)');
-INSERT INTO roads VALUES (3, 'Grand', 'LINESTRING(2 2, 2 4)');
-INSERT INTO roads VALUES (4, 'Oak', 'LINESTRING(2 2, 4 2)');
+INSERT INTO roads VALUES (2, 'Grand', 'LINESTRING(0 0, 2 2)');
+INSERT INTO roads VALUES (3, 'Grand', 'LINESTRING(2 2, 4 2)');
+INSERT INTO roads VALUES (4, 'Oak', 'LINESTRING(0 2, 2 2)');
 ```
 
 <img src="img/network1.png" />
@@ -99,14 +99,14 @@ INSERT INTO roads VALUES (4, 'Oak', 'LINESTRING(2 2, 4 2)');
 Now let's add two new segments to the network:
 
 ```sql
-INSERT INTO roads VALUES (5, 'Larch', 'LINESTRING(2 0, 4 0)');
+INSERT INTO roads VALUES (5, 'Larch', 'LINESTRING(4 0, 6 0)');
 ```
 ```
 ERROR:  road 5 is not connected to the network
 CONTEXT:  PL/pgSQL function noded_road_trigger() line 13 at RAISE
 ```
 ```sql
-INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 2 0)');
+INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 4 0)');
 ```
 ```
 INSERT 0 1
@@ -125,8 +125,8 @@ The two segments have to both be in place in order to evaluate the connectivity.
 DELETE FROM roads WHERE pk = 6;
 -- Does using a transaction block work?
 BEGIN;
-INSERT INTO roads VALUES (5, 'Larch', 'LINESTRING(2 0, 4 0)');
-INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 2 0)');
+INSERT INTO roads VALUES (5, 'Larch', 'LINESTRING(4 0, 6 0)');
+INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 4 0)');
 COMMIT;
 ```
 
@@ -144,8 +144,8 @@ To defer the constraint, we use the [SET CONSTRAINTS](https://www.postgresql.org
 ```sql
 BEGIN;
 SET CONSTRAINTS noded_road DEFERRED;
-INSERT INTO roads VALUES (5, 'Larch', 'LINESTRING(2 0, 4 0)');
-INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 2 0)');
+INSERT INTO roads VALUES (5, 'Larch', 'LINESTRING(4 0, 6 0)');
+INSERT INTO roads VALUES (6, 'Oak', 'LINESTRING(2 2, 4 0)');
 COMMIT;
 ```
 
@@ -159,8 +159,8 @@ But can we also ensure connectivity? It would seem so, if every segment must con
 BEGIN;
 SET CONSTRAINTS noded_road DEFERRED;
 -- These aren't connected, do they fail on commit?
-INSERT INTO roads VALUES (7, 'Sea', 'LINESTRING(5 2, 6 2)');
-INSERT INTO roads VALUES (8, 'Isle', 'LINESTRING(6 2, 6 3)');
+INSERT INTO roads VALUES (7, 'Sea', 'LINESTRING(6 1, 6 2)');
+INSERT INTO roads VALUES (8, 'Isle', 'LINESTRING(6 2, 5 2)');
 -- They do not! :(
 COMMIT;
 -- Clean up.
@@ -217,8 +217,8 @@ BEGIN;
 -- Defer BOTH table constraints this time
 SET CONSTRAINTS ALL DEFERRED;
 -- These aren't connected, do they fail on commit?
-INSERT INTO roads VALUES (7, 'Sea', 'LINESTRING(5 2, 6 2)');
-INSERT INTO roads VALUES (8, 'Isle', 'LINESTRING(6 2, 6 3)');
+INSERT INTO roads VALUES (7, 'Sea', 'LINESTRING(6 1, 6 2)');
+INSERT INTO roads VALUES (8, 'Isle', 'LINESTRING(6 2, 5 2)');
 -- They do!
 COMMIT;
 ```
