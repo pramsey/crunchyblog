@@ -50,6 +50,8 @@ For the specific use case of spatially joining, here is my favourite test case:
 * [1:10M Country Boundaries](https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip)
 * [1:10M Populated Places](https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip)
 
+![Admin0 and Populated Places](img/admin0-places.png "Admin0 and Populated Places")
+
 Load the data into both versions.
 
 ```bash
