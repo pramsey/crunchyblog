@@ -1,4 +1,4 @@
-# Waiting for PostGIS 3.2: Grid Generators
+# Waiting for PostGIS 3.1: Grid Generators
 
 Summarizing data against a fixed grid is a common way of preparing data for analysis. Fixed grids have some advantages over natural and administrative boundaries:
 
