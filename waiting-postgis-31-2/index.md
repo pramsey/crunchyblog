@@ -17,7 +17,7 @@ Ideally, we want to be able to generate grids that have some key features:
 The [ST_SquareGrid(size, bounds)](https://postgis.net/docs/manual-dev/ST_SquareGrid.html) function generates a grid with an origin at (0, 0) in the coordinate plane, and fills in the square bounds of the provided geometry.
 
 ```sql
-SELECT (st_squaregrid(400000, st_transform(a.geom, 3857))).* 
+SELECT (ST_SquareGrid(400000, ST_Transform(a.geom, 3857))).* 
 FROM admin a  
 WHERE name = 'Brazil';
 ```
@@ -40,14 +40,14 @@ The hexagon grid starts with a (0, 0) hexagon centered at the origin, and a grid
 As with the square gridding, the coordinates of hexes are fixed for a particular gridding size.
 
 ```sql
-SELECT (st_squaregrid(100000, st_transform(a.geom, 3857))).* 
+SELECT (ST_HexagonGrid(100000, ST_Transform(a.geom, 3857))).* 
 FROM admin a  
 WHERE name = 'Germany';
 ```
 
 Here's a 100km gridding of Germany.
 
-![Germany hex grid](img/germany-sq.png "Germany hex grid")
+![Germany hex grid](img/germany-hex.png "Germany hex grid")
 
 
 ## Summarizing with Grids
