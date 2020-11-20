@@ -31,9 +31,9 @@ So a grid generated using Brazil as the driving geometry looks like this.
 
 The [ST_HexagonGrid(size, bounds)](https://postgis.net/docs/manual-dev/ST_HexagonGrid.html) function works much the same as the square grid function.
 
-Hexagons are popular for some cartographic display purposes and modeling purposes. Surprisingly the can also be indexed using the same two-dimensional indexing scheme as squares.
+Hexagons are popular for some cartographic display purposes and modeling purposes. Surprisingly they can also be indexed using the same two-dimensional indexing scheme as squares.
 
-The hexagon grid starts with a (0, 0) hexagon centered at the origin, and a gridding for a bounds includes all hexagons that touch the bounds.
+The hexagon grid starts with a (0, 0) hexagon centered at the origin, and the gridding for a bounds includes all hexagons that touch the bounds.
 
 ![Hexagon gridding](img/st_hexagongrid01.png "Hexagon gridding")
 
@@ -45,7 +45,7 @@ FROM admin a
 WHERE name = 'Germany';
 ```
 
-Here's a 100km gridding of Germany.
+Here's a 100km hexagon gridding of Germany.
 
 ![Germany hex grid](img/germany-hex.png "Germany hex grid")
 
