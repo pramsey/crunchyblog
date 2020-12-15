@@ -1,6 +1,6 @@
 # PostGIS Raster and Crunchy Bridge
 
-The PostGIS raster module is not easy to use, but it opens up some unique possibilities for data analysis and accessing non-standard data from within PostgreSQL.
+The PostGIS raster has a steep learning curve, but it opens up some unique possibilities for data analysis and accessing non-standard data from within PostgreSQL.
 Here's an example that shows how to access raster data from PostGIS.
 
 ## When to use Raster
@@ -171,6 +171,7 @@ url=https://s3-us-west-2.amazonaws.com/weather.cleverelephant.ca/pop12.tif
 raster2pgsql \     
   -s 990000 \        # SRID of the data
   -t 256x256 \       # Tile raster
+  -I \               # Index the table
   -R \               # Load as "out-db", metadata only
   /vsicurl/$url \    # File to reference
   pop12 \            # Table name to use
