@@ -1,7 +1,7 @@
 # PostGIS Raster and Crunchy Bridge
 
 The PostGIS raster has a steep learning curve, but it opens up some unique possibilities for data analysis and accessing non-standard data from within PostgreSQL.
-Here's an example that shows how to access raster data from PostGIS.
+Here's an example that shows how to access raster data from PostGIS running on [Crunchy Bridge](https://crunchybridge.com/).
 
 ## When to use Raster
 
