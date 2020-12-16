@@ -290,9 +290,9 @@ Yes, we can, by joining against a list of bands.
 
 And we see that by tomorrow morning (18 to 24 hours from now) the chance of rain at our point will be going up.
 
-## Query the Rasters (JOIN)
+## Query the Rasters (Spatial Join!)
 
-The real fun starts when we combine data from multiple sources for a query.
+The real fun starts when we combine data from multiple sources for a query in a [spatial join](https://www.katacoda.com/crunchydata/courses/postgis/joins).
 
 We have populated places loaded into the database already, from the 7343 places, can we find the 10 places with the highest chance of rain tomorrow?
 
@@ -335,7 +335,7 @@ And it looks like, in 24 hours the rainiest area will be the north-east USA.
 
 In order to get the result, the database has to attach a PoP to every point in the USA before sorting to find the highest values. 
 
-There are 777 places in the USA, and the query takes about 2 seconds, to the external raster queries are costing about 2.5ms on average. GDAL does some caching of raster tiles on the backend, and a single point query is much slower (about 35ms).
+There are 777 places in the USA, and the query takes about 2 seconds, with the external raster queries are costing about 2.5ms on average. GDAL does some caching of raster tiles on the backend, and a single point query is much slower (about 35ms).
 
 ## Conclusion
 
