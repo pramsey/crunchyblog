@@ -68,21 +68,23 @@ Watershed buffer      1.4%     21.8%      3.9%      14.8%
 
 The intersection code was completely re-written between GEOS 3.8 and 3.9, so improvements there are a mixture of implementation and algorithm changes.
 
-The intersection test creates two sets of watersheds, a raw set and a buffered set. For each member of the buffered set, all the raw watersheds are found, and then each pair of watersheds are intersected with one another. 
+The intersection test creates two sets of watersheds, a raw set and a buffered set. For each member of the buffered set, all the raw watersheds are found, and then each pair of watersheds are intersected with one another, producing the original raw input and a collection of corridors.
 
 ![Watershed intersection test](img/watershed-intersection.png)
 
 ```
-                  Improvement over previous release
-                     GEOS 3.7  GEOS 3.8  GEOS 3.9  GEOS Main
-Watershed intersections   3.3%    39.9%     36.9%      11.4%
+                      Improvement over previous release
+                         GEOS 3.7  GEOS 3.8  GEOS 3.9  GEOS Main
+Watershed intersections       3.3%    39.9%     36.9%      11.4%
 ```
 
 ## Watershed Union
 
-The union code was also completely re-written for GEOS 3.9. This test formed to core of our performance benchmark for a couple months, as it exercised the new overlay code and for a while was slower than the previous implementation (now it's faster).
+The union code was also completely re-written for GEOS 3.9. This test formed the core of our performance benchmark for a couple months, as it exercised the new overlay code and for a while was slower than the previous implementation (now it's faster).
 
 ![Watershed union test](img/watershed-union.gif)
+
+The test simply unions all 1384 watersheds into the maximum covering area.
 
 ```
                   Improvement over previous release
