@@ -1,8 +1,6 @@
-BLOG
-
 # Fuzzy Name Matching in PostgreSQL
 
-A surprisingly common problem in both application development and analysis is, "given an input name, find the database record it most likely refers to". It's common because databases of names and people are common, and it's a problem because names are an incredibly irregular identifying token. 
+A surprisingly common problem in both application development and analysis is, "given an input name, find the database record it most likely refers to". It's common because databases of names and people are common, and it's a problem because names are an incredibly irregular identifying tokens. 
 
 The page "Falsehoods Programmers Believe About Names" covers some of the ways names are hard to deal with in programming. This post will ignore most of those complexities, and deal with the still-difficult problem of matching up loose user input to a database of names.
 

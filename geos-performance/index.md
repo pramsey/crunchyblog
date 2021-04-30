@@ -27,9 +27,9 @@ Depending on the use case, the improvements are as much as 15-times faster.
 Each release is approximately one year after the prior release. The tale is pretty straight forward:
 
 * The 3.7 release was largely a bug fix release, with a handful of new features.
-* The 3.8 release was the first after I joined Crunchy. With full-time available for core work, I did some profiling and removed some obvious C++ implementation bottlenecks. Things got faster.
+* The 3.8 release a great deal of attention from community guru [Dan Baston](https://github.com/dbaston), and I helped where I could. Renewed profiling turned up some C++ implementation bottlenecks. Things got faster.
 * The 3.9 release included major **algorithmic** changes, in the intersection/union/difference code. This resulted in speedups for some cases, but also slowdowns in others. More C++ improvements in the core overlay code and the STRtree improved all-around performance.
-* Since 3.9, GEOS community member [Dan Baston](https://github.com/dbaston) has continued to chip away at core implementation. The changes aren't big on this chart (because it starts off so slow) but later I'll show a chart of the improvements relative to 3.9, which are still substantial.
+* Since 3.9, [Dan](https://github.com/dbaston) has continued to chip away at core implementation. The changes aren't big on this chart (because it starts off so slow) but later I'll show a chart of the improvements relative to 3.9, which are still substantial.
 
 The tests are repeated enough to generate "long" runs of a few seconds, so the absolute lengths of the timings have no meaning, but the relative lengths do. The benchmark currently consists of six tests:
 
@@ -140,7 +140,7 @@ Prepared geometry       0.4%     66.5%      5.2%       5.4%
 
 # Upcoming Performance Improvements
 
-Because the performance graph includes some very slow older versions it's hard to appreciate that the current development state of GEOS already includes some substantial speed-ups over the last release.
+Because the performance graph includes some very slow older versions it's hard to appreciate that the current development state of GEOS already includes some substantial speed-ups [Dan Baston](https://github.com/dbaston) has added over the last release.
 
 ```
                                  GEOS 3.9  GEOS Main  % Faster
