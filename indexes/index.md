@@ -1,11 +1,11 @@
 # (The Many) Spatial Indexes of PostGIS
 
-Spatial indexes are used in PostGIS to quickly find spatial features within a dimension space, using spatial properties (location or distance) as the search key.  Practically, this means very quickly answering questions of the form 
+Spatial indexes are used in PostGIS to quickly search for objects in space.  Practically, this means very quickly answering questions of the form:
 
-* "all the things inside this this" or
+* "all the things inside this this", or
 * "all the things near this other thing".
 
-Because spatial objects are often quite large and complex (coastlines commonly are defined with thousands of points, for example) spatial indexes use "bounding boxes" as index and search keys:
+Because spatial objects are often quite large and complex (for example, coastlines commonly are defined with thousands of points) spatial indexes use "bounding boxes" as index and search keys:
 
 * Bounding boxes are of a small, fixed size, only 4 floats for a 2D box; and,
 * Bounding boxes are very inexpensive to compare to test things like containment.
@@ -18,11 +18,11 @@ Creating a spatial index is very simple:
 CREATE INDEX mytable_geom_x ON mytable USING GIST (geom);
 ```
 
-This will create a GIST index on the geometry column, using the default "operator class" for geometry. End of story? Not even close.
+This will create a GIST index on the geometry column, using the default "operator class" for geometry. End of story? **Not even close.**
 
 ## So Many Indexes
 
-For the PostGIS geometry type alone, there are actually 10 different operator classes!
+For the PostGIS geometry type alone, there are actually **10 different operator classes!**
 
 ```sql
 SELECT opcname, amname
@@ -47,10 +47,10 @@ WHERE typ.typname = 'geometry';
  spgist_geometry_ops_nd         | spgist
 ```
 
-The first two operator classes, the "btree" and "hash" indexes, can be safely ignored, because end users have no call to create those indexes, they exist solely to enable some core database functionality. 
+The first two operator classes, the "btree" and "hash" indexes, can be safely ignored.  End users have no call to create those indexes, they exist solely to enable some core database functionality. 
 
 * PostgreSQL requires a **btree** operator class for any type that supports "ORDER BY" in queries, and the geometry type [is sortable](https://blog.crunchydata.com/blog/waiting-for-postgis-3-hilbert-geometry-sorting). 
-* PostgreSQL requires a **hash** operator class for and type that supports "DISTINCT" in queries.
+* PostgreSQL requires a **hash** operator class for any type that supports "DISTINCT" in queries, as geometry does.
 
 The remaining indexes all provide support for the core feature of a spatial index: finding all the spatial objects that are contained by the bounding box of a query spatial object. 
 
@@ -58,7 +58,7 @@ As we can see in the list, the implementations vary in the underlying database a
 
 ## GIST vs SPGIST vs BRIN
 
-The GIST access method is a general general scheme for for building indexes -- "generalized search tree" is what the acronym stands for -- and the index scheme used for the geometry type implements an [R-Tree](https://en.wikipedia.org/wiki/R-tree) algorithm for splitting nodes. This supports a wide range of different spatial use cases and data patterns. Data with a high degree of overlap, and data with regular layout. Data with heterogeneous spatial extent and data with uniform sizing.
+The GIST access method is a general purpose API for building indexes -- "generalized search tree" is what the acronym stands for -- and the index scheme used for the geometry type implements an [R-Tree](https://en.wikipedia.org/wiki/R-tree) structure. The R-Tree supports a wide range of different spatial use cases and data patterns. Data with a high degree of overlap, and also data with regular layout. Data with widely variable spatial extents and also data with uniform sizes.
 
 ![R-Tree](img/rtree.png)
 
@@ -66,11 +66,11 @@ The SP-GIST access method is also a general scheme, but one specifically tuned f
 
 ![R-Tree](img/quadtree.png)
 
-The BRIN access method ("block range index") operates on completely different assumptions. The BRIN index for a column stores the range the column covers for each database page. The "index" is a list of ranges, mapping values of the search space to data pages in the database table. 
+The BRIN access method ("block range index") operates on completely different assumptions. The BRIN index for a column stores the range the column covers for each database page. The BRIN index is a list of ranges, mapping values of the search space to data pages in the database table. 
 
-The result is an insanely small index, even for very large tables. However, the effectiveness of the index is tied to the underlying ordering of the data. A table full of streaming timestamped data, where new values are written but nothing is ever deleted would be an excellent candidate for a BRIN index on the timestamp column. 
+The result is an insanely small index, even for very large tables. However, the effectiveness of the index is directly proportional to the underlying ordering of the data. A table full of streaming timestamped data, where new values are written but nothing is ever deleted would be an excellent candidate for a BRIN index on the timestamp column, because the data would be neatly ordered on time. 
 
-In the spatial domain, pre-sorting the data by geometry can yield a very "searchable" data set for BRIN, and that's what we'll do in this post.
+In the spatial domain, pre-sorting the data by geometry can yield a very "searchable" data set for BRIN, and that's what we'll do to the data in this post when we compare BRIN performance.
 
 ## Comparing Index Builds
 
@@ -149,18 +149,18 @@ GIST        270ms
 SPGIST      375ms 
 ```
 
-As a general rule, when the data have a lot of overlaps, GIST with out perform SPGIST. When there is less overlap, then SPGIST will outperform GIST.
+As a general rule, when the data have a lot of overlaps, GIST will out-perform SPGIST. When there is less overlap, then SPGIST will out-perform GIST.
 
-Visually, using a synthetic data set of randomly sized circles with a high degree of overlay, GIST was about 5-15% faster.
+Visually, using this synthetic data set of randomly sized circles with a high degree of overlay, GIST was about 5-15% faster.
 
 ![GIST Faster](img/gist_faster.png)
 
-While using a synethetic data set of randomly size circles with less overlay, SPGIST was about 5-15% faster.
+While using this synthetic data set of randomly sized circles with less overlap, SPGIST was about 5-15% faster.
 
 ![SPGIST Faster](img/spgist_faster.png)
 
 ## Conclusions
 
 * Yes, you need a spatial index for your spatial data!
-* Don't neglect the possibility of using the newer SPGIST implementation over the tried-and-true GIST, if your data does not have a lot of overlap.
+* Don't neglect the possibility of using the newer SPGIST implementation over the tried-and-true GIST, particularly if your data is relatively uniform and does not have a lot of overlap.
 * Consider BRIN only if your data table is large, and stored in highly spatially correlated order.
