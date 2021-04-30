@@ -87,7 +87,7 @@ CREATE TABLE table points AS
 ALTER TABLE points ADD PRIMARY KEY (pk);
 ```
 
-![1M dots](img/docs.png)
+![1M dots](img/dots.png)
 
 To generate data for BRIN tests, we'll do the same thing but add an "ORDER BY geom" clause to pre-sort the data by location.
 
