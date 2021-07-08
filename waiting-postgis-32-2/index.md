@@ -46,7 +46,7 @@ In truth there is no "correct" answer for many repairs, only differences of opin
 
 Here the different approaches show a difference. The old algorithm preserves the zero-width edge where the hole and shell overlap, the new one subtracts the hole from the shell.
 
-![Overlapping multi-polygon](img/overapping-multi.jpg)
+![Overlapping multi-polygon](img/overlapping-multi.jpg)
 
 Here, the old algorithm preserves every edge in an overlapping multi-polygon case, resulting in a checkerboard, while the new algorithm reasons that the correct representation of the two overlapping polygons is the union of their areas.
 
