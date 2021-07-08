@@ -38,7 +38,7 @@ For simple cases, both algorithms return the same result. In this case the figur
 
 ## Algorithm Differences
 
-The original algorithm is called "linework" because it endeavors to preserve every edge and vertex in the original input. The new algorithm is called "structure" because it tries to reason from the structure of the input (exterior rings bound area, interior holes exclude area) to find the "correct" repair.
+The original algorithm is called "**linework**" because it endeavors to preserve every edge and vertex in the original input. The new algorithm is called "**structure**" because it tries to reason from the structure of the input (exterior rings bound area, interior holes exclude area) to find the "correct" repair.
 
 In truth there is no "correct" answer for many repairs, only differences of opinion.
 
@@ -62,7 +62,7 @@ Using the 75 invalid inputs, and comparing the two algorithms repairing those in
 
 ## Putting Repair in Action
 
-If you are accepting new geometry from third parties and want to ensure your calculations remain robust, it might make sense to pre-validate them on insert and update, and then pre-emptively repair them before storing them.
+If you are accepting new geometry from third parties and want to ensure your calculations remain robust, it might make sense to **validate** them on insert and update, and then **pre-emptively repair** them before storing them by adding a [trigger](https://www.postgresql.org/docs/current/plpgsql-trigger.html) to your table.
 
 ```sql
 CREATE FUNCTION ensure_geometry_valid() 
