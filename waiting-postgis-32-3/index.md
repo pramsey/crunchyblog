@@ -23,7 +23,7 @@ SELECT ST_Length(
 FROM coord;
 ```
 
-So we have a pixel size of about 37 meters at 49 degrees north latitude. 
+So we have a pixel size of about **37 meters** at 49 degrees north latitude. 
 
 
 ## Preparing the Database and Data
@@ -48,7 +48,7 @@ gdalinfo https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm/N49W12
 
 Importantly, this metadata includes the internal tiling (`Block=512x512`) of the COG file, which we will use when generating our own "out-db" tiles in PostGIS.
 
-We load the two files that cover the Greater Vancouver area. The first load command using "create" mode (`-c`) and the second uses "append" (`-a`).
+We load the two files that cover the Greater Vancouver area. The first load command uses "create" mode (`-c`) and the second uses "append" (`-a`).
 
 ```sh
 url=https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm
@@ -60,7 +60,7 @@ When the load is finished, we have 128 raster objects loaded in the `dem` table 
 
 ![STRM out-db raster objects loaded](img/contour1.jpg)
 
-If you want to see the extents of rasters, just create a view that extracts the raster boundaries as geometry.
+If you want to see a map like this one, of the extents of rasters, just create a view that extracts the raster boundaries as geometry.
 
 ```
 CREATE VIEW dem_rasters AS 
@@ -71,11 +71,11 @@ FROM dem;
 
 ## Contouring
 
-We will generate some contours for the "north shore" of Vancouver, where the mountains rise up from the sea. The key in doing raster analysis is to only pull the data you really need, because the data are large, and the computations expensive, so we pull only the two raster objects that cover our area of interest.
+We will generate some contours for the "north shore" of Vancouver, where the mountains rise up from the sea. The key in doing raster analysis is to **only pull the data you really need**, because the data are large, and the computations expensive, so we pull only the two raster objects that cover our area of interest.
 
 ![STRM out-db tiled grid](img/contour2.jpg)
 
-The [ST_Contour](http://postgis.net/docs/manual-dev/RT_ST_Contour.html) has a number of parameters to control the starting contour, the distance between contours, and even to exactly fix the values at which contours are generated. Except for the first parameter, the raster itself, all the others are optional and will default to sensible values.
+The [ST_Contour](http://postgis.net/docs/manual-dev/RT_ST_Contour.html) function has a number of parameters to control the starting contour, the distance between contours, and even to exactly fix the values at which contours are generated. Except for the first parameter, the raster itself, all the others are optional and will default to sensible values.
 
 ```
 ST_Contour(raster rast, 
@@ -86,7 +86,7 @@ ST_Contour(raster rast,
   boolean polygonize);
 ```
 
-Now we run the  function on the rasters of interest.
+Now we run the  function on the rasters of interest. The [ST_Contour](http://postgis.net/docs/manual-dev/RT_ST_Contour.html) function returns a set of tuple values (geom, id, value), so we can write the results directly into a table structure. 
 
 ```sql
 CREATE TABLE contours AS
@@ -98,11 +98,11 @@ CREATE TABLE contours AS
   WHERE rid IN (102, 103)
 ```
 
-The [ST_Contour](http://postgis.net/docs/manual-dev/RT_ST_Contour.html) function returns a set of tuple values (geom, id, value), so we can write the results directly into a table structure. 
+Generating the 378 contour lines takes about 200ms.
 
 ![Contours generated at 50 meters](img/contour3.jpg)
 
-These contours have been generated one raster chip at a time, so as you might expect, there are some inconsistencies at the raster boundaries.
+These contours have been generated one raster chip at a time, so as you might expect, there are some inconsistencies at the **raster boundaries**.
 
 ![Contours edge error](img/contour4.jpg)
 
@@ -159,7 +159,7 @@ What if we want to extract not just one value at a point, but an entire elevatio
 
 ![Transect line](img/contour6.jpg)
 
-The [ST_SetZ](http://postgis.net/docs/manual-dev/RT_ST_SetZ.html) function allows us to copy values off of a raster, one value for each vertex in the input object, for instance here copy values onto our elevation profile line.
+The [ST_SetZ](http://postgis.net/docs/manual-dev/RT_ST_SetZ.html) function allows us to copy values off of a raster, one value for each vertex in the input object, for instance here we copy values onto our elevation profile line.
 
 ```sql
 WITH transect AS (
@@ -181,7 +181,9 @@ FROM transect, rast;
 LINESTRING Z (-123.27614 49.42094 0,-123.01514 49.29564 0)
 ```
 
-Unfortunately this just returns the elevation of the line endpoints, which are both **zero** since the ends of the line are in the ocean. We need to add vertices to our line at regular intervals, to generate a nice elevation profile, and fortunately there is a function to do exactly that, [ST_Segmentize](http://postgis.net/docs/ST_Segmentize.html).
+Unfortunately this just returns the elevation of the **line endpoints**, which are both **zero** since the ends of the line are in the ocean! 
+
+We need to add vertices to our line at regular intervals, to generate a nice elevation profile, and fortunately there is a function to do exactly that, [ST_Segmentize](http://postgis.net/docs/ST_Segmentize.html).
 
 ```sql
 CREATE TABLE transect AS
@@ -210,7 +212,7 @@ FROM z;
 This is a complex multi-step process, but roughly what happens is:
 
 * The profile line is segmentized every 1000 meters, doing the work in the "geography" type, so we get 100 meter spacing even though we are feeding in a line string in geographic coordinates.
-* The line is used to find the rasters we need, and those rasters are unioned into a single working raster.
+* The profile line is used to find the rasters we need, and those rasters are unioned into a single working raster.
 * The elevation values are now copied into the profile line with [ST_SetZ](http://postgis.net/docs/manual-dev/RT_ST_SetZ.html).
 * Finally the profile line is dumped into its component vertices so we can easily read out the results, and label them on a map.
 
