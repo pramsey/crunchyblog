@@ -121,7 +121,7 @@ Temperature models are obviously not as simple as inverse-weighted distance, but
 
 ## Conclusions
 
-* You can use HTTP and regexp and glue to bodge together a refreshable data table from a web page.
+* You can use HTTP and regular expressions and glue to bodge together a refreshable data table from a web page.
 * Surface interpolation provides a new way to leverage sparse spatial observations into domain-wide estimates.
 * With more raster tools (to be discussed in upcoming posts) doing raster/vector calculations will allow for even more interesting data processing.
 
