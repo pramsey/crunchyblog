@@ -205,7 +205,7 @@ z AS (
   FROM rast
   CROSS JOIN transect
 )
-SELECT round(ST_Z(geom)), geom
+SELECT round(ST_Z(geom)) AS z, geom
 FROM z;
 ```
 
