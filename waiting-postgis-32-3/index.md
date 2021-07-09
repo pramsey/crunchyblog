@@ -7,7 +7,7 @@ One theme of the 3.2 release is new analytical functionality in the raster modul
 
 Can you believe that there is a complete raster data set of all [SRTM](https://www2.jpl.nasa.gov/srtm/) elevation data online, in [cloud optimized GeoTIFF](https://www.cogeo.org/) format? It's true, there is (and much more), at [OpenTopography](https://www.opentopography.org/)!
 
-The [SRTM data set](https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm.vrt) is a collection of 14380 files, with a pixel size of one arc-second. Each file has one degree of data, so 3600 by 3600 pixels.
+The [SRTM data set](https://portal.opentopography.org/raster?opentopoID=OTSRTM.082015.4326.1) is a collection of 14380 files, with a pixel size of one arc-second. Each file has one degree of data, so 3600 by 3600 pixels.
 
 Since the gridding is arc-seconds, the actual on-the-ground resolution varies by latitude, getting finer further north. We are going to be working in the area of Vancouver, Canada, and we can calculate the pixel size for that location.
 
