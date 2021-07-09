@@ -60,6 +60,8 @@ The new algorithm was tested against 75 different kinds of invalid inputs, and w
 
 Using the 75 invalid inputs, and comparing the two algorithms repairing those inputs, we found that the new algorithm is **2.7 times** faster than the old algorithm. Most people do not have a lot of invalid geometry to repair, but for those that do, the new implementation is a huge improvement.
 
+PostGIS 3.2 (via GEOS 3.10) will also include an improved [ST_IsValid](https://postgis.net/docs/ST_IsValid.html) that is about 30% faster than the previous version.
+
 ## Putting Repair in Action
 
 If you are accepting new geometry from third parties and want to ensure your calculations remain robust, it might make sense to **validate** them on insert and update, and then **pre-emptively repair** them before storing them by adding a [trigger](https://www.postgresql.org/docs/current/plpgsql-trigger.html) to your table.
@@ -89,5 +91,6 @@ CREATE TRIGGER geometry_valid
 * Geometry validity is worth keeping track of, using [ST_IsValid()](https://postgis.net/docs/ST_IsValid.html), to avoid algorithm failures
 * Geometry can be repaired using [ST_MakeValid()](https://postgis.net/docs/manual-dev/ST_MakeValid.html)
 * The new "method=structure" algorithm offers a higher performance and maybe "more correct" (depending on who you ask) take on geometry repair
+* Performance of both validity testing and validity repair has improved substantially in PostGIS 3.2 via GEOS 3.10.
 
 
