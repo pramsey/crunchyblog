@@ -1,6 +1,6 @@
 # Waiting for PostGIS 3.2: ST_Contour and ST_SetZ
 
-One theme of the 3.2 release is new analytical functionality in the raster module, and access to cloud-based rasters via the "out-db" option for rasters. Let's explore two new functions and exercise cloud raster support at the same time.
+One theme of the 3.2 release is new analytical functionality in the raster module, and [access to cloud-based rasters](https://blog.crunchydata.com/postgis-raster-and-crunchy-bridge) via the "out-db" option for rasters. Let's explore two new functions and exercise cloud raster support at the same time.
 
 
 ## OpenTopography
