@@ -19,6 +19,8 @@ However, **accessing** rasters **from** a database is a powerful tool:
 * rasters can model continuous data in a way points, lines and polygons cannot;
 * raster access via SQL abstracts away format and language differences in the same way that vector access does.
 
+![Continuous elevation data](img/dem.jpg)
+
 PostGIS has long supported both models, raster **in** the database, and raster **from** the database. Raster **in** the database is called "in-db" and raster **from** the database is called "out-db".
 
 ## Filesystem vs cloud
@@ -27,6 +29,8 @@ The "out-db" model was built before the advent of cloud storage, and the expecta
 
 With the rise of cloud storage options, the GDAL library began adding support for reading and writing from cloud objects via HTTP. This sounds amazingly inefficient, and while it is surely slower than direct file-system access, the combination of HTTP support for direct byte-range access and very fast network speed inside cloud data centers makes it practical -- if your processing system is running on a cloud compute node in the same data center as your object is stored, performance can be perfectly reasonable.
 
+![Cloud storage](img/cloud.jpg)
+
 The improved capability of GDAL to access cloud rasters has meant that the original PostGIS "out-db" model has transparently been upgraded from a "local filesystem" model to a "cloud access" model, with almost no effort on our part. Instead of accessing "out-db" files with a file-system path, we access cloud files with a URL, and GDAL does the rest.
 
 ## Tile sizes and out-db
@@ -34,6 +38,8 @@ The improved capability of GDAL to access cloud rasters has meant that the origi
 The raster model in PostGIS initially was built for in-db work, and has a key assumption that raster data will be broken up into relatively small chunks. This makes sense on a number of levels, since small chunks will join more efficiently to (similarly small) vector objects, and small chunks will stay within the PostgreSQL page size, which is also more efficient.
 
 For out-db work, the core model of chopping up inputs into smaller chunks still applies, but the most efficient chunking size is no longer dictated by the internal PostgreSQL page size, instead it is driven by the internal tiling of the external raster.
+
+![Tiled rasters](img/contour1.jpg)
 
 In our blog post on [contouring using raster](https://blog.crunchydata.com/blog/waiting-for-postgis-3.2-st_contour-and-st_setz) we deliberately loaded our raster tables of elevation using a tile size that matched the internal tiling of the remote raster.
 
