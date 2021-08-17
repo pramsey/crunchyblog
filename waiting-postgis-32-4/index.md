@@ -49,11 +49,12 @@ A given raster file will be chunked into a collection of smaller raster objects 
 
 You can see the contents by using some of the raster metadata functions.
 
-```
+```sql
 SELECT (ST_Metadata(rast)).* 
 FROM dem 
 WHERE rid = 1;
-
+```
+```
 -[ RECORD 1 ]----------------------
 upperleftx | -123.00013888888888
 upperlefty | 50.00013888888889
@@ -69,11 +70,12 @@ numbands   | 1
 
 The basic raster metadata provides the geometry of the tile: where it is in space (upperleft), what its pixel size is (scale), how large it is (width/height) and the spatial reference system. This tile is an elevation tile with just one band.
 
-```
+```sql
 SELECT (st_bandmetadata(rast)).* 
 FROM dem 
 WHERE rid = 1;
-
+```
+```
 -[ RECORD 1 ]-+------------------------
 pixeltype     | 16BSI
 nodatavalue   | -32768
