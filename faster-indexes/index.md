@@ -6,7 +6,7 @@ One of the curious aspects of spatial indexes is that the nodes of the tree can 
 
 That means that if you're searching an area in which two nodes overlap, you'll have to scan the contents of both nodes. For a trivial example above, that's not a big deal, but if an index has a lot of overlap, the extra work can add up to a measurable query time difference.
 
-The PostGIS spatial index is based on a [R-tree](https://en.wikipedia.org/wiki/R-tree) structure, which naturally tries to split nodes into children that have minimized overlap. As the index is built, it naturally tries to conform to the distribution of the data, with more nodes in dense data areas and fewer in sparse areas. 
+The PostGIS spatial index is based on a [R-tree](https://en.wikipedia.org/wiki/R-tree) structure, which naturally tries to split nodes into children that have minimized overlap. As the index is built, it automatically tries to conform to the distribution of the data, with more nodes in dense data areas and fewer in sparse areas. 
 
 So problem solved, right?
 
@@ -22,9 +22,9 @@ CREATE EXTENSION postgis;
 \i roads.sql
 
 CREATE TABLE roads_sorted AS 
-SELECT * FROM roads ORDER BY geom;
+  SELECT * FROM roads ORDER BY geom;
 
-CREATE INDEX roads_sorted_idx ON roads USING GIST (geom);
+CREATE INDEX roads_sorted_idx ON roads_sorted USING GIST (geom);
 ```
 
 If we order the roads in a [Hilbert curve](https://en.wikipedia.org/wiki/Hilbert_curve) (which is the default sort order for `geometry`) we get a table that is highly spatially autocorrelated.
@@ -36,15 +36,15 @@ And then if we visualize the top two levels of the index (using [gevel](https://
 
 ![](img/idx_sorted_gevel.jpg)
 
-This is not actually a terrible tree! Mostly the notes don't have a lot of overlap, but the shape of the level one pages (the dotted lines) isn't great, and there's some stretching, both vertically and horizontally.
+This is not actually a terrible tree! Mostly the nodes don't have a lot of overlap, but the shape of the level one pages (the dotted lines) isn't great, and there's some stretching, both vertically and horizontally.
 
 Now, take the same data and **randomize** it.
 
 ```sql
 CREATE TABLE roads_random AS 
-SELECT * FROM roads ORDER BY random();
+  SELECT * FROM roads ORDER BY random();
 
-CREATE INDEX roads_random_idx ON roads USING GIST (geom);
+CREATE INDEX roads_random_idx ON roads_random USING GIST (geom);
 ```
 
 The table now has no spatial correlation at all.
@@ -71,7 +71,9 @@ So it's pretty. So what?
 
 ## Different Trees, Different Performance
 
-In fact, a pretty index performs faster than an ugly one. To test, we will run a self-join of the table on itself. The query plan is a nested loop join, and the table is 92K records long, so that's 92K index lookups.
+In fact, a pretty index performs faster than an ugly one. 
+
+To test, we will run a self-join of the table on itself. The query plan is a nested loop join, and the table is 92K records long, so that's 92K index lookups.
 
 ```
 # SELECT count(*) 
