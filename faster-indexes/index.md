@@ -47,7 +47,7 @@ SELECT * FROM roads ORDER BY random();
 CREATE INDEX roads_random_idx ON roads USING GIST (geom);
 ```
 
-The now has no spatial correlation at all.
+The table now has no spatial correlation at all.
 
 ![](img/idx_random.gif)
 
@@ -57,11 +57,11 @@ And then if we visualize the top two levels of the index, we can see how the pag
 
 The level one nodes are definitely better, but it's hard to see how much better the level two nodes are until you zoom in.
 
-Here's the sorted level one nodes.
+Here's the level one nodes from sorted input.
 
 ![](img/idx_sorted_gevel_zoom.jpg)
 
-And here's the random level one nodes.
+And here's the level one nodes from randomized input.
 
 ![](img/idx_random_gevel_zoom.jpg)
 
