@@ -110,7 +110,7 @@ ANALYZE phl_parking_geom;
 
 Making a second copy while creating a geometry column takes about **24 seconds**.
 
-Finally, to carry out a spatial join, I will need a spatial index on the parking points.
+Finally, to carry out a spatial join, I will need a spatial index on the parking points. In this case I follow my advice about [when to use different spatial indexes](https://blog.crunchydata.com/blog/the-many-spatial-indexes-of-postgis) and build an "spgist" index on the geometry.
 
 ```sql
 CREATE INDEX phl_parking_geom_spgist_x 
