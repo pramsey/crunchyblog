@@ -1,4 +1,4 @@
-# Performance and Spatial Joins
+# PostGIS vs GPU: Performance and Spatial Joins
 
 Every once and a while, a post shows up online about someone using GPUs for common spatial analysis tasks, and I get a burst of techno-enthusiasm. Maybe this is truly the new way! 
 
