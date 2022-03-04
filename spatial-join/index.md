@@ -4,7 +4,7 @@ Every once and a while, a post shows up online about someone using GPUs for comm
 
 This week it was [a post on GPU-assisted spatial joins](https://medium.com/swlh/how-to-perform-fast-and-powerful-geospatial-data-analysis-with-gpu-48f16a168b10) that caught my eye. In summary, the author took a 9M record set of [parking infractions data](https://www.opendataphilly.org/dataset/parking-violations) from Philadelphia and joined it to a 150 record set of [Philadelphia neighborhoods](https://www.opendataphilly.org/dataset/philadelphia-neighborhoods). The process involved building up a little execution engine in Python, and was pretty manual, but certainly fast.
 
-<img src="img/philly01.jpg" />
+<img src="img/philly02.jpg" />
 
 I wondered: just how bad would execution on a boring environment like PostGIS be, in comparison?
 
@@ -12,30 +12,15 @@ Follow along, if you like!
 
 ## Server Setup
 
-I grabbed an 8-core cloud server with an Ubuntu 20.04 image on it, and set up PostgreSQL 14 with PostGIS 3 like so:
+I grabbed an 8-core cloud server from [Crunchy Bridge DBaaS](https://crunchybridge.com) with PostgreSQL 14 with and PostGIS 3 like so:
 
-```bash
-# Add PostgreSQL repository
-sudo add-apt-repository \
-  "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 14"
-
-# Remove any pre-existing PostgreSQL installs
-sudo apt-get -y -f --ignore-missing --purge remove \
-  postgresql postgresql-common postgresql-10 postgresql-12 postgresql-13
-
-# Install PostgreSQL 14 and PostGIS  
-apt-get -y install \
-  postgresql-14 postgresql-client-14 \
-  postgresql-14-postgis-3 postgis unzip 
-```
+<img src="img/bridge01.jpg" />
 
 ## Data Download
 
-Then I switched to the `postgres` user and pulled down the data.
+Then I pulled down the data.
 
 ```bash
-sudo su - postgres
-
 #
 # Download Philadelphia parking infraction data 
 #
@@ -53,7 +38,8 @@ unzip Neighborhoods_Philadelphia.zip
 shp2pgsql -s 102729 -D Neighborhoods_Philadelphia phl_hoods > phl_hoods.sql
 
 # Connect to database
-psql -d postgres
+# (get the DATABASE_URL from the Crunchy Bridge UI)
+psql $DATABASE_URL
 ```
 
 ## Data Loading and Preparation
@@ -204,6 +190,8 @@ SELECT h.name, count(*)
 ```
 
 The final query running with 4 workers takes **24 seconds** to execute the join of the 9 million parking infractions with the 150 neighborhoods.
+
+<img src="img/philly01.jpg" />
 
 This is pretty good!
 
