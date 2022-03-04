@@ -12,7 +12,7 @@ Follow along, if you like!
 
 ## Server Setup
 
-I grabbed an 8-core cloud server from [Crunchy Bridge DBaaS](https://crunchybridge.com) with PostgreSQL 14 with and PostGIS 3 like so:
+I grabbed an 8-core cloud server with PostgreSQL 14 and PostGIS 3 from [Crunchy Bridge DBaaS](https://crunchybridge.com), like so:
 
 <img src="img/bridge01.png" />
 
