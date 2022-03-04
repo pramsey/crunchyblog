@@ -14,7 +14,7 @@ Follow along, if you like!
 
 I grabbed an 8-core cloud server from [Crunchy Bridge DBaaS](https://crunchybridge.com) with PostgreSQL 14 with and PostGIS 3 like so:
 
-<img src="img/bridge01.jpg" />
+<img src="img/bridge01.png" />
 
 ## Data Download
 
