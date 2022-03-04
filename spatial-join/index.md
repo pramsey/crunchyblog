@@ -144,7 +144,7 @@ SHOW min_parallel_table_scan_size;    -- 8MB
 Aha! That minimum table size for parallel scans seems large compared to our neighborhoods table.
 
 ```sql
-philly=# select pg_relation_size('phl_hoods'); 
+SELECT pg_relation_size('phl_hoods'); 
 
 -- 237568
 ```
