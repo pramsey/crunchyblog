@@ -104,7 +104,7 @@ And here's the nodes from randomized input.
 
 This raises an intriguing possibility: if, after building the pretty index from randomized inputs, we then sort the underlying table using the index order, is the result the perfect marriage of "nice index" and "nice data"?
 
-Fortunately, we can test is, because the PostgreSQL [CLUSTER](https://www.postgresql.org/docs/current/sql-cluster.html) command does exactly what we want: it reorders a table based on the index.
+Fortunately, we can test this, because the PostgreSQL [CLUSTER](https://www.postgresql.org/docs/current/sql-cluster.html) command does exactly what we want: it reorders a table based on the index.
 
 ```sql
 CLUSTER roads_random USING roads_random_idx;
@@ -118,15 +118,15 @@ roads_sorted: 259ms
 roads_random after cluster: 260ms
 ```
 
-However, sorting the table into a spatially correlated order (driven by the index) has brought performance to parity with the pre-sorted table.
+However, sorting the table into a spatially correlated order (driven by the index) has brought performance to parity with the pre-sorted table!
 
 ## Conclusion
 
 Based on our tests, the simplest way to get a table with good spatial auto-correlation for the fastest spatial joins is to just:
 
-* Load the table as usual
-* Build a spatial index as usual
+* Load the table as usual; then,
+* Build a spatial index as usual; and finally,
 * Cluster the table using that spatial index
 
-For very large input tables, this might take a while, and the table will be locked while the clustering process runs, to be aware. Also, new data inserted into the table later will **not** be ordered spatially, so you may need to re-cluster your table from time-to-time if squeezing every ounce of performance out of your joins is the over-riding concern.
+For very large input tables, this might take a while, and the table will be locked while the clustering process runs, so beware. Also, new data inserted into the table later will **not** be ordered spatially, so you may need to re-cluster your table from time-to-time if squeezing every ounce of performance out of your joins is the over-riding concern.
 
