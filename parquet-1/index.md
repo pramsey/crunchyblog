@@ -229,12 +229,12 @@ For plowing through the whole table and doing a summary, the Parquet query is ab
 SELECT issuing_agency, count(1) 
 FROM phl_parking_pq 
 GROUP BY issuing_agency;
-Time: 3043 ms
+-- Time: 3043 ms
 
 SELECT issuing_agency, count(1) 
 FROM phl_parking
 GROUP BY issuing_agency;
-Time: 3103 ms
+-- Time: 3103 ms
 ```
 
 My internal model for the performance differences is that, while the Parquet format has some advantages in avoiding unnecessary reads, via row block filtering and accessing only the columns of interest, those advantages are offset by some inefficiencies in converting the raw data from parquet into the internal PostgreSQL formats.
