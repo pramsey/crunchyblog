@@ -24,7 +24,11 @@ Is there an alternative to dropping the tables?
 
 What if there was a storage option that was still durable, allowed access via multiple query tools, and could integrate transparently into your operational transactional database?
 
+<img src='img/lake.jpg' />
+
 How about: storing the static data in [Parquet format](https://www.upsolver.com/blog/apache-parquet-why-use) but retaining database access to the data via the [parquet_fdw](https://github.com/adjust/parquet_fdw/)?
+
+<img src='img/parquet5.jpg' />
 
 Sounds a bit crazy, but:
 
@@ -63,6 +67,8 @@ However, I was able to demonstrate to my own satisfaction that things were baked
 ### Loading Data
 
 I started with a handy data table of Philadelphia parking infractions, that I used in a previous [blog post on spatial joins](https://www.crunchydata.com/blog/performance-and-spatial-joins), and sorted the file by date of infraction, `issue_datetime`.
+
+<img src='img/parquet6.jpg' />
 
 <details><summary>Data Download and Sort</summary>
 
@@ -120,6 +126,8 @@ Just over 1GB!
 ### Generating Parquet
 
 How do I get a Parquet file?
+
+
 
 This turns out to be way harder then I expected. Most internet advice was around using Python or Spark to convert CSV files into Parquet. In the end, I used the very new (currently unreleased, coming in GDAL 3.5) [support for Parquet in GDAL library](https://gdal.org/drivers/vector/parquet.html), and the `ogr2ogr` command to do the conversion.
 
