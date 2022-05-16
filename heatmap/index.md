@@ -27,7 +27,7 @@ Yes, we can do all the heavy lifting with [Crunchy Bridge](https://crunchybridge
 * [Crunchy Bridge container apps](https://docs.crunchybridge.com/container-apps/) host the `pg_featureserv` microservice and a `varnish` web cache, so that lots of load doesn't overwhelm our database.
 * Static web page goes anywhere that can hold a static web page (S3 in this case).
 
-![architecture](img/architecture.jpg)
+<img src="img/architecture.jpg" style="max-width: 600px" />
 
 ## Prepare the Data
 
@@ -182,7 +182,7 @@ STRICT;
 
 Our architecture uses two microservices: `pg_featureserv` to publish the database functions as web services; and `varnish` to protect the feature service from excessive load if the application gets a lot of traffic.
 
-![architecture](img/architecture.jpg)
+<img src="img/architecture.jpg" style="max-width: 600px" />
 
 These services are run as [Crunchy Bridge Container Apps](https://docs.crunchybridge.com/container-apps/) using an extension called `pgpodman`.
 
