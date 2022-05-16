@@ -8,7 +8,7 @@ The application uses PostgreSQL to store and search 2.2M geographic names in the
 
 <iframe 
     width="100%" height="550px" style="border: none" 
-    src="https://s3.amazonaws.com/s3.cleverelephant.ca/geonames-lookup.html">
+    src="http://s3.amazonaws.com/s3.cleverelephant.ca/geonames-lookup.html">
     <img src="img/bayou.jpg" />
 </iframe>
 
