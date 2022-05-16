@@ -6,7 +6,9 @@ The [pg_featureserv](https://github.com/crunchydata/pg_featureserv) micro-servic
 
 The application uses PostgreSQL to store and search 2.2M geographic names in the USA. Type in the search box and the auto-fill form will find candidate words. Select a word, and the database will perform a full-text search for all the names that match your work, and return the result to the map. The map displays the result using a heat map.
 
-<iframe width="100%" height="550px" style="border: none" src="https://s3.amazonaws.com/s3.cleverelephant.ca/geonames-lookup.html">
+<iframe 
+    width="100%" height="550px" style="border: none" 
+    src="https://s3.amazonaws.com/s3.cleverelephant.ca/geonames-lookup.html">
     <img src="img/bayou.jpg" />
 </iframe>
 
