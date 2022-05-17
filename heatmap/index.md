@@ -24,7 +24,7 @@ What, "running somewhere" is doing a lot of work here! Is there any way to do th
 Yes, we can do all the heavy lifting with [Crunchy Bridge](https://crunchybridge.com)! 
 
 * Crunchy Bridge hosts the database.
-* [Crunchy Bridge container apps](https://docs.crunchybridge.com/container-apps/) host the `pg_featureserv` microservice and a `varnish` web cache, so that lots of load doesn't overwhelm our database.
+* [Crunchy Bridge container apps](https://docs.crunchybridge.com/container-apps/) host the `pg_featureserv` microservice and a `varnish` web cache.
 * Static web page goes anywhere that can hold a static web page (S3 in this case).
 
 <img src="img/architecture.jpg" style="max-width: 600px" />
