@@ -87,9 +87,9 @@ CREATE TABLE geonames (
 
 ## Create Indexes
 
-There are 2.2M named places in the database, and we want to very quickly find names that match our query word. Often the named are multi-word ("Gold River", "West Gold Hills") and we will be searching with just one word. This is where full-text search indexing comes in handy.
+There are 2.2M named places in the database, and we want to very quickly find names that match our query word. Often the names are multi-word ("Gold River", "West Gold Hills") and we will be searching with just one word. This is where [full-text search indexing](https://www.postgresql.org/docs/current/textsearch.html) comes in handy.
 
-Full-text indexes can only be built on a `tsvector` type. We can either add a new `tsvector` column to our table, and then populate it, or save a little space and just build a functional index on the `tsvector` construction function.
+Full-text indexes can only be built on a `tsvector` type. We can either add a new `tsvector` column to our table, and then populate it, or save a little space and just build a [functional index](https://www.postgresql.org/docs/current/indexes-expressional.html) on the `tsvector` construction function.
 
 ```sql
 CREATE INDEX geonames_name_x 
@@ -114,8 +114,8 @@ CREATE INDEX geonames_stats_word_x ON geonames_stats (word text_pattern_ops);
 
 The web map application needs an HTTP API to connect to, this is where `pg_featureserv` comes in. We will create two functions: 
 
-* One to drive the dropdown form field, which takes the characters currently typed and finds all matching words.
-* One to drive the map, which takes in the query word and returns all matching place names.
+* One function to drive the dropdown form field, which takes the characters currently typed and finds all matching words.
+* One function to drive the map, which takes in the query word and returns all matching places.
 
 The magic power of `pg_featureserv` is in the ability to publish [user defined functions](https://access.crunchydata.com/documentation/pg_featureserv/latest/usage/functions/). 
 
@@ -219,7 +219,7 @@ SELECT run_container('
     -e DNS_ENABLED=false 
     -e COOKIES=true 
     -e PARAM_VALUE="-p default_ttl=3600" 
-    docker.io/eeacms/varnish:latest');
+    docker.io/pramsey/varnish:latest');
 ```
 
 The `varnish` container is the "outward facing" service, so web requests should come into port 5435, where they will be passed to the varnish process inside the container on port 6081. Then `varnish` will call out to its `BACKEND` host (`pg_featureserv`) this time on port 5442, which in turn is proxied into port 9000 inside the container.
@@ -229,13 +229,17 @@ The `varnish` container is the "outward facing" service, so web requests should 
 Once the services are running, you can hit them manually from the outside.
 
 ```bash
-http://hostname:5435/functions/geonames_query/items.json?q=cougar
-http://hostname:5435/functions/geonames_stats_query/items.json?q=cougar
+http://p.fhlzf432a5gmvaj456jql4a4di.db.postgresbridge.com:5435/functions/geonames_query/items.json?q=cougar
+http://p.fhlzf432a5gmvaj456jql4a4di.db.postgresbridge.com:5435/functions/geonames_stats_query/items.json?q=cougar
 ```
 
+Of course, it is much more fun to use the functions with the [web map](http://s3.cleverelephant.ca/geonames-lookup.html)!
 
+### Conclusions
 
-
+* Publishing web services using the [Crunchy Bridge Container Apps](https://docs.crunchybridge.com/container-apps/) is a neat way to quickly stand up web services.
+* PostgreSQL full-text indexes can very quickly search very large corpuses of text.
+* Seeing data visually in a map is a great way to explore it!
 
 
 
