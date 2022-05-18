@@ -182,7 +182,7 @@ STRICT;
 
 Our architecture uses two microservices: `pg_featureserv` to publish the database functions as web services; and `varnish` to protect the feature service from excessive load if the application gets a lot of traffic.
 
-<img src="img/architecture.jpg" style="max-width: 600px" />
+<img src="img/architecture2.jpg" style="max-width: 600px" />
 
 These services are run as [Crunchy Bridge Container Apps](https://docs.crunchybridge.com/container-apps/) using an extension called `pgpodman`.
 
