@@ -38,11 +38,12 @@ CREATE EXTENSION pgpodman;
 
 To make it easier to get started, we have a "Container Apps" tab right in the Crunchy Bridge UI.
 
-![header](img/header.png)
+<img src="img/header.png" style="border-width: 1px; border-color: lightgrey;" />
+
 
 Select the tab, and choose "[PgWeb](http://sosedoff.github.io/pgweb/)" from the dropdown of "Quickstart" apps. These are apps we have provided example start-up SQL for. 
 
-![container](img/container.png)
+<img src="img/container.png" style="border-width: 1px; border-color: lightgrey;" />
 
 For [PgWeb](http://sosedoff.github.io/pgweb/) the start-up SQL looks like this:
 
@@ -143,7 +144,7 @@ SELECT container_logs('3905a7b91124');
  To view database open http://0.0.0.0:8081/ in browser
 ```
 
-![pgweb](img/pgweb.png)
+<img src="img/pgweb.png" style="border-width: 1px; border-color: lightgrey;" />
 
 
 ## Conclusions
