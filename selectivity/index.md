@@ -93,7 +93,7 @@ But wait, how does the database know which box is selective, without running a q
 
 ## Statistics
 
-When the `ANALYZE` command is run, the database will gather "statistics" for every column that has an index on it. 
+When the `ANALYZE` command is run, the database will gather "statistics" for every column that has an index on it. (The "autovacuum" system that runs in the background of every PostgreSQL cluster is also an "autoanalyze", gathering statistics at the same time it does table maintenance.)
 
 For data types like integers, real numbers, text and dates the system will gather a "common value list" of values that show up frequently in the table, and a histogram of the frequency of values in different ranges.
 
@@ -105,11 +105,11 @@ Instead of being a potentially unconstrained collection of maybe millions of spa
 
 <img src="img/indexes05.png" />
 
-The spatial statistics in PostGIS are actually a little more sophisticated than that: before filling out the histogram they adjust the cell widths for each dimension, to try and catch more resolution in places where the data is more dense.
+The spatial statistics analyzer in PostGIS is actually a little more sophisticated than that: before filling out the histogram it adjusts the cell widths for each dimension, to try and catch more resolution in places where the data is more dense.
 
 <img src="img/indexes06.png" />
 
-All these statistics do have a cost. Increasing statistics targets will make the `ANALYZE` command run a little slower, as it samples more data. It will also make the planning stage of queries slower, as the larger collection of statistics need to be read through and compared to the filters and joins in the SQL. However, for complex BI queries, more statistics are almost always worth whiel to get a better plan for a complex query.
+All these statistics do have a cost. Increasing statistics targets will make the `ANALYZE` command run a little slower, as it samples more data. It will also make the planning stage of queries slower, as the larger collection of statistics need to be read through and compared to the filters and joins in the SQL. However, for complex BI queries, more statistics are almost always worth while to get a better plan for a complex query.
 
 
 ## Conclusion
