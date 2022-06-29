@@ -99,13 +99,13 @@ SELECT pg_size_pretty(pg_relation_size('test'))               AS table_size,
 
 The BTree indexes end up very close to the table size. The BRIN indexes are **1000 times smaller**. This is with the default `pages_per_range` of **128** -- smaller values of `pages_per_range` will result in slightly larger (but still very small!) indexes.
 
-```
-table_size            | 42 MB
-btree_random_size     | 21 MB
-brin_random_size      | 24 kB
-btree_sequential_size | 21 MB
-brin_sequential_size  | 24 kB
-```
+| Relation              | Size  |
+|-----------------------|-------|
+| table_size            | 42 MB |
+| btree_random_size     | 21 MB |
+| brin_random_size      | 24 kB |
+| btree_sequential_size | 21 MB |
+| brin_sequential_size  | 24 kB |
 
 Now, we drop all the indexes, and then re-create them one at a time, testing each for larger and larger result sets.
 
