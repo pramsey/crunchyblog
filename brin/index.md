@@ -41,7 +41,7 @@ Because the BRIN has one entry for each range of pages, it's also very small. Th
 
 ## Measuring the Differences
 
-For testing, we generate a table with two columns: one completely uncorrelated to the storage on disk ("random"), and one perfectly correlated ("sequential"). They both are in the range of zero to one million, so range queries on them will have similar numbers of return values.
+For testing, we generate a table with three columns: one key completely uncorrelated to the storage on disk ("random"), one key perfectly correlated ("sequential"), and a "value" column to retrieve. 
 
 ```sql
 CREATE TABLE test AS 
@@ -53,7 +53,7 @@ CREATE TABLE test AS
 ANALYZE test;
 ```
 
-Now we measure some baseline timings with **larger and larger** result sets.
+Both keys are in the range of zero to one million, so range queries on them will have similar numbers of return values. Now we measure some baseline timings with **larger and larger** result sets.
 
 ```sql
 EXPLAIN ANALYZE 
@@ -65,18 +65,18 @@ SELECT Sum(value) FROM test
  WHERE sequential between 0.0 and 100.0;
 ```
 
-This is the summary query all the timings below uses. It sums a `value` column based on a filter of either the `random` or `sequential` keys.
+This is the summary query that all the timings below use. It sums the `value` column based on a filter of either the `random` or `sequential` keys.
 
-(It is worth noting as a side bar that in the case of summarizing the indexed column, the btree has the advantage of being able to use an index-only scan. To do an apples-to-apples comparison, we've avoided that here.)
+(It is worth noting as a side bar that in the case of summarizing the indexed column, the btree has the advantage of being able to use an index-only scan. To do an apples-to-apples comparison, we've avoided that here by summarizing a separate "value" column.)
 
-For the first test, since there are no indexesyet, the system has to scan the whole table every time, for both columns, so the only change is it takes **slightly longer** to count all the records as the result set gets larger.
+For the first test, since there are no indexes yet, the system has to scan the whole table every time, so the only change is it takes **slightly longer** to sum all the values as the result set gets larger.
 
 | Rows   | Filter Rand | Filter Seq |
 |--------|-------------|------------|
-| 100    | 220         | 218        |
-| 1000   | 230         | 224        |
-| 10000  | 250         | 249        |
-| 100000 | 262         | 264        |
+| 100    | 220 ms      | 218 ms     |
+| 1000   | 230 ms      | 224 ms     |
+| 10000  | 250 ms      | 249 ms     |
+| 100000 | 262 ms      | 264 ms     |
 
 Let's build indexes now.
 
@@ -87,7 +87,7 @@ CREATE INDEX brin_random_x ON test USING BRIN (random);
 CREATE INDEX brin_sequential_x ON test USING BRIN (sequential);
 ```
 
-Note the huge size differences!
+Note the huge size differences among the indexes!
 
 ```sql
 SELECT pg_size_pretty(pg_relation_size('test'))               AS table_size,
@@ -97,7 +97,7 @@ SELECT pg_size_pretty(pg_relation_size('test'))               AS table_size,
        pg_size_pretty(pg_relation_size('brin_sequential_x'))  AS brin_sequential_size;
 ```
 
-The BTree indexes end up very close to the table size (since every value is distince, and there are no columns in the table other than indexed columns). The BRIN indexes are **1000 times smaller**. This is with the default `pages_per_range` of **128**, smaller values will result in larger (but still very small!) indexes.
+The BTree indexes end up very close to the table size. The BRIN indexes are **1000 times smaller**. This is with the default `pages_per_range` of **128** -- smaller values of `pages_per_range` will result in slightly larger (but still very small!) indexes.
 
 ```
 table_size            | 42 MB
@@ -107,14 +107,14 @@ btree_sequential_size | 21 MB
 brin_sequential_size  | 24 kB
 ```
 
-Now, drop all the indexes, and then re-create them one at a time, testing each for larger and larger result sets.
+Now, we drop all the indexes, and then re-create them one at a time, testing each for larger and larger result sets.
 
 | Rows   | BTree Rand | BTree Seq | BRIN Rand | BRIN Seq |
 |--------|------------|-----------|-----------|----------|
-| 100    | 0.6        | 0.5       | 211       | 11       |
-| 1000   | 5          | 2         | 207       | 10       |
-| 10000  | 22         | 13        | 221       | 15       |
-| 100000 | 98         | 85        | 250       | 67       |
+| 100    | 0.6 ms     | 0.5 ms    | 211 ms    | 11 ms    |
+| 1000   | 5 ms       | 2 ms      | 207 ms    | 10 ms    |
+| 10000  | 22 ms      | 13 ms     | 221 ms    | 15 ms    |
+| 100000 | 98 ms      | 85 ms     | 250 ms    | 67 ms    |
 
 First, note that as expected the BRIN index is completely useless when filtering the random key. The order of the data on disk is uncorrelated with the order of the key, so the BRIN index is no better than a sequence scan.
 
@@ -131,12 +131,12 @@ DROP INDEX brin_sequential_x;
 CREATE INDEX brin_sequential_x ON test USING BRIN (sequential) WITH (pages_per_range=64);
 ```
 
-| Rows   | PPR=128 | PPR=64 | PPR=32 | PPR=16 | PPR=8 | PPR=4 |
-|--------|---------|--------|--------|--------|-------|-------|
-| 100    | 11      | 7      | 4      | 3      | 2.5   | 3.5   |
-| 1000   | 12      | 8      | 5      | 4      | 3.5   | 4.5   |
-| 10000  | 13      | 12     | 11     | 11     | 12    | 13    |
-| 100000 | 67      | 68     | 67     | 68     | 69    | 69    |
+| Rows   | PPR=128 | PPR=64 | PPR=32 | PPR=16 | PPR=8  | PPR=4  |
+|--------|---------|--------|--------|--------|--------|--------|
+| 100    | 11 ms   | 7 ms   | 4 ms   | 3 ms   | 2.5 ms | 3.5 ms |
+| 1000   | 12 ms   | 8 ms   | 5 ms   | 4 ms   | 3.5 ms | 4.5 ms |
+| 10000  | 13 ms   | 12 ms  | 11 ms  | 11 ms  | 12 ms  | 13 ms  |
+| 100000 | 67 ms   | 68 ms  | 67 ms  | 68 ms  | 69 ms  | 69 ms  |
 
 The variable performances are a interplay of how many rows fit in each page of the table and how many pages the query filter needs to read to fulfill the query.
 
