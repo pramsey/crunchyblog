@@ -20,7 +20,15 @@ So that's a pretty narrow subset of the kinds of data you might manage. However,
 
 Because the BRIN index is so simple, it's possible to describe the internals with barely any simplifying.
 
-First, as noted above, you need a table where the physical layout and the ordering of the column of interest are strongly correlated.
+Data in PostgreSQL tables are **arranged on disk in equal-sized "pages"** of 8kb each. So a table will physically reside on disk as a collection of pages. Within each page, rows are packed in from the front, with gaps appearing as data is deleted/updated and usually some spare space at the end for future updates. 
+
+![Table Page](img/brin-table.png)
+
+A table with narrow rows (few columns, small values) will fit a lot of rows into a page. A table with wide rows (more columns, long strings) will fit only a few.
+
+Because each page holds multiple rows, we can state that a given column in that page has a minimum and maximum value in that page. When searching for a particular value, the whole page can be skipped, if the value is not within the min/max of the page. This is the core **magic of BRIN**.
+
+So, for BRIN to be effective, you need a table where the **physical layout** and the **ordering of the column of interest** are **strongly correlated**. In situation of perfect correlation (which we test below) each page will in fact contain a completely unique set of of values.
 
 ![Correlated Table](img/brin-table.png)
 
