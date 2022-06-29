@@ -22,7 +22,7 @@ Because the BRIN index is so simple, it's possible to describe the internals wit
 
 Data in PostgreSQL tables are **arranged on disk in equal-sized "pages"** of 8kb each. So a table will physically reside on disk as a collection of pages. Within each page, rows are packed in from the front, with gaps appearing as data is deleted/updated and usually some spare space at the end for future updates. 
 
-![Table Page](img/brin-table.png)
+![Table Page](img/brin-page.png)
 
 A table with narrow rows (few columns, small values) will fit a lot of rows into a page. A table with wide rows (more columns, long strings) will fit only a few.
 
