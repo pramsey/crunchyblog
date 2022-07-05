@@ -12,6 +12,8 @@ If your processing needs can be met with a fixed size type (integer or floating 
 
 If you need to process data at extremely high precision, or store with exact precision, then use the `numeric` type, which has no range bounds and exact storage, at the price of size and processing speed.
 
+For even more compact size on disk and in memory, also [look closely at the order of your columns](https://www.crunchydata.com/blog/choice-of-table-column-types-and-order-when-migrating-to-postgresql). Packing small columns close together can yield surprising gains.
+
 ## Fixed Size Numbers
 
 The smaller the type, the less space the data takes on disk and in memory, which is a big win! At the same time, the smaller the type, the narrower the range of values it can store!
