@@ -201,7 +201,7 @@ To generate a password hash, you need two things:
 * the plaintext password
 * a "salt" to initialize the hashing algorithm
 
-The "salt" is the important bit, as ensures that duplicate passwords actually generate distinct hashes, so avoid password collisions. Here we generate a "[blowfish](https://en.wikipedia.org/wiki/Blowfish_(cipher)" password hash using "ilovemarge" as the plaintext.
+The "salt" is the important bit, as ensures that duplicate passwords actually generate distinct hashes, thus avoiding password hash collisions. Here we generate a [blowfish](https://en.wikipedia.org/wiki/Blowfish_\(cipher\)) password hash using "ilovemarge" as the plaintext.
 
 ```sql
 -- bf is the blowfish cipher
