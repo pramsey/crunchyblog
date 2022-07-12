@@ -266,7 +266,7 @@ CREATE INDEX file_manifest_digest_x ON file_manifest (digest);
 Then checking for a unique file would be as simple as:
 
 ```sql
-SELECT * 
+SELECT Count(*) 
   FROM file_manifest
   WHERE digest = digest({{file_content}}, 'sha1');
 ```
