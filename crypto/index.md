@@ -201,7 +201,7 @@ To generate a password hash, you need two things:
 * the plaintext password
 * a "salt" to initialize the hashing algorithm
 
-The "salt" is the important bit, as ensures that duplicate passwords actually generate distinct hashes, thus avoiding password hash collisions. Here we generate a [blowfish](https://en.wikipedia.org/wiki/Blowfish_\(cipher\)) password hash using "ilovemarge" as the plaintext.
+The "salt" is the important bit, as ensures that duplicate passwords actually generate distinct hashes, thus avoiding password hash collisions. Here we generate a "[blowfish](https://en.wikipedia.org/wiki/Blowfish_\(cipher\))" password hash using "ilovemarge" as the plaintext password.
 
 ```sql
 -- bf is the blowfish cipher
@@ -216,9 +216,9 @@ $2a$06$BQ2LACTO/.RFjbYGDMN8we61MRrN2s4EFzmEJeHskmbmyNrAul74a
 
 ### Checking a Password Hash
 
-OK, someone gave you a plaintext password and you astutely hashed it and threw it away as fast as possible. Now how to you validate a correct password the next time someone throws one at you?
+OK, someone gave you a plaintext password and you astutely hashed it and threw it away as fast as possible. Now how do you verify a plain password the next time someone throws one at you?
 
-Hash it again. This time though, use your stored hash value as the salt for the new hashing routine, like this:
+Hash it again! This time though, use your stored hash value as the salt for the new hashing routine, like this:
 
 ```sql
 -- bf is the blowfish cipher
@@ -239,10 +239,11 @@ FROM passwords
 WHERE id = 'homer@springfieldnuclear.com'
 ```
 
+Note that the password table never stores a plain text password, it only ever deals in the hashed values.
 
 ## Digests
 
-Another useful trick you can do with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) is generate "digtets", relatively short codes that can uniquely substitute for larger hunks of data.
+Another useful trick you can do with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) is generate "digests", relatively short codes that can uniquely substitute for larger hunks of data.
 
 ![Digests](digest.png)
 
@@ -250,7 +251,7 @@ If you had a large collection of image files, and someone handed you a new image
 
 One way would be to check every file before you accept the new one: is the new file the same as any of the existing ones? That's a full scan of your whole collection -- it is going to be slow.
 
-Another way would be to create a database table that stores, for each file in your collection, the path to the file and a digest of the file contents. You can index that digest code and very very quickly search the set of digests.
+Another way would be to create a database table that stores, for each file in your collection, the path to the file and a digest of the file contents. You can **index that digest code** and very very quickly search the set of digests.
 
 ```sql
 CREATE TABLE file_manifest (
