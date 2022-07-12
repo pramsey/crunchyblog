@@ -2,13 +2,13 @@
 
 Ha ha, made you look! 
 
-This post is not a crazy scam (you be the judge) but just a practical description of using cryptographical algorithms to the encipher and decipher data inside PostgreSQL.
+This post is not a crazy scam (you be the judge) but just a practical description of using cryptographical algorithms to encrypt and decrypt data inside PostgreSQL.
 
 Using the [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) extension, you can:
 
 * apply symmetric encryption (one secret key);
 * apply public key encryption (one secret key, one public key);
-* interoperate with PGP standard keys and payload formats;
+* interoperate with [OpenPGP](https://tools.ietf.org/html/rfc4880) standard keys and payload formats;
 * generate and test passwords; and,
 * generate digests to summarize content.
 
@@ -20,24 +20,24 @@ The [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) extension 
 
 ## Symmetric Encryption
 
-Symmetric encryption uses one key for to both encipher and decipher payloads. This puts a high premium on password management, but it's easy to understand: there's one secret key password, don't lose (or expose) it!
+Symmetric encryption uses one key to both encrypt and decrypt payloads. This puts a high premium on password management, but it's easy to understand: there's one secret key password, don't lose (or expose) it!
 
 ![Symmetric Encryption](symmetric.png)
 
 The [pgp_sym_encrypt()](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.35.8.11) symmetric encryption function takes in three parameters:
 
-* The payload to be encrypted in text;
-* The password to generate the symmetric key with (effectively this ends up being your external representation of the symetric key, so make sure it is strong); and
-* [Options](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.35.8.18) to pass the encryption engine.
+* The textpayload to be encrypted;
+* The password to generate the symmetric key with (effectively this ends up being your external representation of the symmetric key, so make sure it is strong); and
+* [Options](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.35.8.18) to pass to the encryption engine.
 
-Here we encrypt a short poem about secrecy, using "mypassword" as the password, and choosing the [AES256](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) algorithm, applied after some compression of the payload.
+Here we encrypt a short poem about secrecy, using "mypassword" as the password, and choosing the [AES256](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) algorithm, applied after compressing the payload with zlib.
 
 ```sql
 WITH args AS (
   SELECT
     'The Blanket, Sees all secrets, Forgets many, Reveals nothing, ...' AS payload,
     'mypassword' AS password,
-   'compress-algo=1, cipher-algo=aes256' AS options
+    'compress-algo=1, cipher-algo=aes256' AS options
   )
 SELECT armor(pgp_sym_encrypt(payload, password, options))
   FROM args;
@@ -57,10 +57,10 @@ f30m71IhlYqn6VaWAXKqH2f7VRV5
 -----END PGP MESSAGE-----
 ```
 
-Because it's a standard you can copy and paste it into a file (hint: "test.gpg") and decrypt it using [Gnu Privacy Guard](https://gnupg.org/) (GPG).
+Because the amored ciphertext is in a standard PGP format you can copy and paste it into a file (hint: "poem.gpg") and decrypt it using [Gnu Privacy Guard](https://gnupg.org/) (GPG).
 
 ```
-gpg --output test.txt test.gpg
+gpg --output peom.txt poem.gpg
 ```
 
 Note that we don't even have to tell GPG what encryption scheme we used -- it's all encoded in the armor. Just give it the password (hint: "mypassword") and it spits out the original poem.
@@ -69,11 +69,13 @@ If you are storing the encrypted data in a database column, it is best to use a 
 
 ## Public Key Encryption
 
-Public key encryption is a clever scheme that uses "key pairs" -- each key pair consists of a "public key" which can be provided to anyone, and used to encrypt payloads, and a "private key" which is kept secret and used to decrypt payloads.
+Public key encryption is a clever scheme that uses "key pairs" Each key pair consists of a "public key" which can be provided to anyone, and used to encrypt payloads, and a "private key" which is kept secret and used to decrypt payloads.
 
 ![Public Key Encryption](publickey.png)
 
-Note that unlike symmetric encryption, public key encryption doesn't require strong security for the encrypting key. This means you can receive encrypted payloads from anyone, but only you will be able to decrypt them. Or, you could store data encrypted with users' public keys, but only they would be able to view it (using their secret key).
+Note that unlike symmetric encryption, public key encryption doesn't require strong security for the encrypting key. This means you can can publish your public key widely, and receive encrypted payloads from anyone who has the public key... but only you will be able to decrypt them. 
+
+Or in the opposite scenario, you could store data payloads encrypted with many users' public keys, but only they would be able to decrypt it (using their secret key).
 
 ### Generating Keys
 
@@ -83,13 +85,11 @@ For our example, we will make a key for `Homer Simpson <homer@springfieldnuclear
 
 ```
 % gpg --gen-key   
-      
+
 gpg (GnuPG) 2.2.35; Copyright (C) 2022 g10 Code GmbH
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
-gpg: directory '/Users/pramsey/.gnupg' created
-gpg: keybox '/Users/pramsey/.gnupg/pubring.kbx' created
 Note: Use "gpg --full-generate-key" for a full featured key generation dialog.
 
 GnuPG needs to construct a user ID to identify your key.
@@ -141,7 +141,7 @@ Now that our keys are easily accessible, demonstrating encrypting and decryption
 WITH args AS (
   SELECT
     'The Blanket, Sees all secrets, Forgets many, Reveals nothing, ...' AS payload,
-   'compress-algo=1, cipher-algo=aes256' AS options
+    'compress-algo=1, cipher-algo=aes256' AS options
   )
 SELECT armor(pgp_pub_encrypt(args.payload, keys.public_key, args.options))
   FROM args, keys
@@ -188,9 +188,9 @@ SELECT pgp_pub_decrypt(encrypted.bytes, keys.secret_key, 'ilovemarge')
 
 ## Passwords
 
-Passwords are great fun, if you like being yelled at by security professionals. If you don't, then when someone gives you a plain text password, get rid of it as quickly as possible.
+Working with passwords is great fun, if you like being yelled at by security professionals. If you don't, then when someone gives you a plain text password, get rid of it as quickly as possible.
 
-![Public Key Encryption](publickey.png)
+![Passwords](hashpass.png)
 
 One way to get rid of a password is to "hash" it. Run it through a one-way cryptographic function that converts it to a unique number. That way you can forget the actual password and only store the hash, while still retaining the ability to check if future input matches the stored hash.
 
