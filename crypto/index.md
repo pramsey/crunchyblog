@@ -50,10 +50,10 @@ The result looks like this.
 ```
 -----BEGIN PGP MESSAGE-----
 
-ww0ECQMCUYg3PeuA1Dxu0nYBczZaEOGkZ/9EeNRkMUDHRSLN81Q8AFfztqYWWf5JFegksgXw0mWj
-omJJmkgVQrt3ZISbcc9y5mKu95y1d/+3WX8c43PeekU6YW5GqjQzJaEnVV8M97Ts1GWEjvAOHrxW
-xZKBwVv/gnfG6fEcfmqBaO6ULSQ/
-=o5ss
+ww0ECQMC46Tv/FL2lZtp0nYBPMSd2ReBlTcLcBTekE2mkWWbx3jMZAUzBcLYOZttqZe6YHlomYkx
+0wWiEWHWEMWFW0WXM/wxlj/xqWKppT/YUp4Q4gjWiLjm7oq+iulY7tCeXdamcSp925YuuFTlIBqt
+f30m71IhlYqn6VaWAXKqH2f7VRV5
+=niDe
 -----END PGP MESSAGE-----
 ```
 
@@ -79,23 +79,25 @@ Note that unlike symmetric encryption, public key encryption doesn't require str
 
 Unlike the simple symmetric encryption scenario, dealing with key pairs means first generating the pair. Usually a user would do this themselves, but for demonstration purposes we will generate and test our own pair, using `gpg --gen-key`.
 
-For our example, we will make a key for `Homer Simpson <hsimpson@aol.com>` using "ilovemarge" as the password:
+For our example, we will make a key for `Homer Simpson <homer@springfieldnuclear.com>` using "ilovemarge" as the password:
 
 ```
-% gpg --gen-key
-
+% gpg --gen-key   
+      
 gpg (GnuPG) 2.2.35; Copyright (C) 2022 g10 Code GmbH
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
+gpg: directory '/Users/pramsey/.gnupg' created
+gpg: keybox '/Users/pramsey/.gnupg/pubring.kbx' created
 Note: Use "gpg --full-generate-key" for a full featured key generation dialog.
 
 GnuPG needs to construct a user ID to identify your key.
 
 Real name: Homer Simpson
-Email address: hsimpson@aol.com
+Email address: homer@springfieldnuclear.com
 You selected this USER-ID:
-    "Homer Simpson <hsimpson@aol.com>"
+    "Homer Simpson <homer@springfieldnuclear.com>"
 
 Change (N)ame, (E)mail, or (O)kay/(Q)uit? o
 ```
@@ -107,16 +109,16 @@ Once the key pair is generated, you can list the keys in your keychain:
 
 ---------------------------------
 sec   rsa3072 2022-07-12 [SC] [expires: 2024-07-11]
-      A1A97EF859E1AC7BFF1832B489903979E83FF6DB
-uid           [ultimate] Homer Simpson <hsimpson@aol.com>
+      04ECDA97DDED57E6A6DBC57009D23B87223F0114
+uid           [ultimate] Homer Simpson <homer@springfieldnuclear.com>
 ssb   rsa3072 2022-07-12 [E] [expires: 2024-07-11]
 ```
 
 And then extract them to files, in this case [public.key](public.key) and [public.key](public.key):
 
 ```
-gpg -a -o public.key --export hsimpson@aol.com 
-gpg -a -o secret.key --export-secret-keys hsimpson@aol.com 
+gpg -a -o public.key --export homer@springfieldnuclear.com 
+gpg -a -o secret.key --export-secret-keys homer@springfieldnuclear.com 
 ```
 
 To make working with these big hunks of data easier, here's a [keys table](keys.sql) that stores the keys in dearmored `bytea` form along with their id. The keys table just looks like this:
@@ -143,7 +145,7 @@ WITH args AS (
   )
 SELECT armor(pgp_pub_encrypt(args.payload, keys.public_key, args.options))
   FROM args, keys
-  WHERE keys.id = 'hsimpson@aol.com';
+  WHERE keys.id = 'homer@springfieldnuclear.com';
 ```
 
 And out pops our ciphertext!
@@ -151,17 +153,17 @@ And out pops our ciphertext!
 ```
 -----BEGIN PGP MESSAGE-----
 
-wcDMA4wC52f1x3wFAQwAxnmfN74f/XfXrN9NQcUwLQ1LKvviswOXymg8RwpcQoi0rUIktRIWNeqN
-wU8lz2hOzIBTZHOvP4oSP4N8PppMOOs9+0BxaHFc6h250I6hDB6plcaIGi+K+c/0zRdgJTSbDUbW
-q+IqCHpnYLA4OZy98MVB40Vmbx8RqyQQETWV4T7j5tKizFSJ4JiqhTGmn7sdE2xE+iSpVa085Yqm
-7m15ec8mkuw7bMyKi/7nFQA6KUHMCuugRXiVKPM1yaf5BuV+E0LggUzXPEcUJoo+AAMuLsVLI6ny
-apaQxsISDyG2e80hO3nGy+TCOR8ktAd/faEdC7qau2bvORkRPPBxjtnHdenyumcTvxj1Q6eNZbav
-1Vmy4zSpoRhgH4xPnsboLHOVm3xOg2nfO+ICQDx7/r+m0iGZcyt6wNm4GmVnARgyZSHcmn2EjeA2
-5KxEl/dRcki/okiM3omSx7L5RKA7B7G9RLf1OwQDwCv2fju+L1Efj9ZItFxSo5TqHe6rMv5tcDfq
-0nYBlR6Trwi3x0MYLSkLiDj/ZTCeJgsuVRH9l6HnWwZkNBemzqM3GASQEKlttfY8zIl+UOjXK5vc
-RH+5FLw6WSshSP8A3jjAGQYJv/I5DsknLwpgWXlucO/Fnrvrc3zT6mi4PEDapr9LDyTiF9IdR9Dw
-MYaRpNIj
-=r0Wt
+wcDMAyrb0BxZVTADAQv/W4rwhXpgkA+WYm+V3IYxCVnHWn3Yc6Ejh1z63q5dGgeHd7XL1aJqL4+B
+CJgIKUU7AndC4OCKMTALT6hR5YbLxW/pGBWqm72hAKuX/p+v/j6FNoVD/2vio0JYsW2zO/xK3Q7o
+TiG2ox3+s1+m94Yb0ixLP6ganBW57U3FHtyA3TgV6igmk6m8C2aa2d0qkgUyW51Pd1uEA3wsIqON
+cOpSL0TZJSShTrzq9rNLKFF49aGg3KRsdLoJl0otLRL6hCIygJ/i/xLNm6vOVkxCxuSTtcN4Ba2e
+xgVX6jjIosBG+flejpFk2lg+G7l+nqWd49mOsk/wWi1ZkiMw2Bj/D4Vty45yoV0UaABlkFhHzlT4
+0tSIk/7eXVUGiywZEphvixYB5wpySOZomGddPj/0C8uqtBXQkyNrn2u5/ouCFdCMNpog15mYduMU
+OWyPSlqmWjo+D7HxrUqW1EADeSZ+OTyEcdNb8xyatsMGuyIrAmphpAqzy1rAMw/Jm4DAQfWkVo1N
+0nYBt1ltXrkJlbskQ2IGj/t0x71pfYTB8WUAKKFWIQkvYVZHI3Bv7DF7j/aN448npWyTl3OktG4g
+Wn00B2xrfq3kM2EpFG/wAD0xb9fxmlOFO12RY+qV93GokJ7VgQVH2p6OtfF9+VunKlCdtW3mOwAG
+W4fQh4WN
+=KB03
 -----END PGP MESSAGE-----
 ```
 
@@ -176,11 +178,11 @@ WITH args AS (
 encrypted AS (
   SELECT pgp_pub_encrypt(args.payload, keys.public_key, args.options) AS bytes
     FROM args, keys
-    WHERE keys.id = 'hsimpson@aol.com'
+    WHERE keys.id = 'homer@springfieldnuclear.com'
 )
 SELECT pgp_pub_decrypt(encrypted.bytes, keys.secret_key, 'ilovemarge')
   FROM encrypted, keys
-  WHERE keys.id = 'hsimpson@aol.com';
+  WHERE keys.id = 'homer@springfieldnuclear.com';
 
 ```
 
@@ -234,7 +236,7 @@ So, a notional "is the password correct" query might look like this:
 ```sql
 SELECT hash == crypt({{plain_password}}, hash)
 FROM passwords
-WHERE id = 'hsimpson@aol.com'
+WHERE id = 'homer@springfieldnuclear.com'
 ```
 
 
