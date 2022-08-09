@@ -139,14 +139,16 @@ SELECT a.i
   WHERE b.i IS NULL;
 ```
 
-This also takes about **850 ms**. The `LEFT JOIN` is required to return a record for every row of "A". So what does it do if there's no record in "B" that satisfies the join condition? It returns `NULL` for the columns of "B" in the join relation for those records. That means any row with a `NULL` in a column of "B" that is normally non-`NULL` is a record in "A" that is not in "B".
+This also takes about **850 ms**. 
+
+The `LEFT JOIN` is required to return a record for every row of "A". So what does it do if there's no record in "B" that satisfies the join condition? It returns `NULL` for the columns of "B" in the join relation for those records. That means any row with a `NULL` in a column of "B" that is normally non-`NULL` is a record in "A" that is not in "B".
 
 
 ## Now do Spatial
 
 The nice thing about the `LEFT JOIN` expression of of the solution is that it generalizes nicely to arbitrary join conditions, like those using spatial predicate functions.
 
-"Find the geonames points that are not inside counties"... OK, we will left join geonames with counties and find the records where counties are `NULL`.
+"Find the geonames points that are not inside counties"... OK, we will `LEFT JOIN` geonames with counties and find the records where counties are `NULL`.
 
 ```sql
 SELECT g.name, g.geonameid, g.geom
