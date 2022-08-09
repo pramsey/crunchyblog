@@ -99,7 +99,7 @@ The query plan is interesting: the two tables are appended and then sorted for d
 It's a big hammer, but it works.
 
 
-## Anti-Join. Yes.
+## Anti-Join? Yes.
 
 The best approach is the "anti-join". While not associated with the End Times, and not found in Revelations, the anti-join is nonetheless a powerful technique.
 
