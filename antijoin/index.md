@@ -32,7 +32,7 @@ The spatial setup is a 2M record table of geographic names, and a 3K record tabl
 
 ## Subqueries? No.
 
-Since the problem statement includes the works "not in", this form of the query seems superficially plausible:
+Since the problem statement includes the words "not in", this form of the query seems superficially plausible:
 
 ```sql
 SELECT i 
@@ -54,7 +54,7 @@ Perfect! Give me everything from "A" that is not in "B"! Just what we want? In f
                  ->  Seq Scan on b  (cost=0.00..14424.98 rows=999998 width=4)
 ```
 
-Note that the subquery ends up materializing the whole second table into memory, where it is scanned over and over to test each row of table "A". Not good.
+Note that the subquery ends up materializing the whole second table into memory, where it is scanned **over and over and over** to test each key in table "A". Not good.
 
 
 ## Except? Maybe.
@@ -103,6 +103,8 @@ It's a big hammer, but it works.
 
 The best approach is the "anti-join". While not associated with the End Times, and not found in Revelations, the anti-join is nonetheless a powerful technique.
 
+![Last Judgement](lastjudgement.jpg)
+
 One way to express an anti-join is with a special "correlated subquery" syntax:
 
 ```sql
@@ -137,7 +139,7 @@ SELECT a.i
   WHERE b.i IS NULL;
 ```
 
-The `LEFT JOIN` is required to return a record for every row of "A". So what does it do if there's no record in "B" that satisfies the join condition? It returns `NULL` for the columns of "B" in the join relation for those records. That means any row with a `NULL` in a column of "B" that is normally non-`NULL` is a record in "A" that is not in "B".
+This also takes about **850 ms**. The `LEFT JOIN` is required to return a record for every row of "A". So what does it do if there's no record in "B" that satisfies the join condition? It returns `NULL` for the columns of "B" in the join relation for those records. That means any row with a `NULL` in a column of "B" that is normally non-`NULL` is a record in "A" that is not in "B".
 
 
 ## Now do Spatial
@@ -154,7 +156,7 @@ SELECT g.name, g.geonameid, g.geom
   WHERE g.geom IS NULL;
 ```
 
-The answer pops out in a about a minute.
+The answer pops out in about a minute.
 
 ![Find geoname points not in counties](points-out.jpg)
 
