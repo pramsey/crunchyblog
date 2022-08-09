@@ -69,7 +69,7 @@ EXCEPT
 SELECT b.i FROM b;
 ```
 
-The SQL still matches our mental model of the problem statement: everything in "A" except for everything in "B".
+The SQL still matches our mental model of the problem statement: everything in "A" **except** for everything in "B".
 
 And it returns a correct answer in about **2.3 seconds**.
 
@@ -105,7 +105,7 @@ The best approach is the "anti-join". While not associated with the End Times, a
 
 ![Last Judgement](lastjudgement.jpg)
 
-One way to express an anti-join is with a special "correlated subquery" syntax:
+One way to express an anti-join is with a special "[correlated subquery](https://www.postgresql.org/docs/current/functions-subquery.html)" syntax:
 
 ```sql
 SELECT a.i 
