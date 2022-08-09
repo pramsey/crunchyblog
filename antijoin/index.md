@@ -162,7 +162,7 @@ The answer pops out in about a minute.
 
 ![Find geoname points not in counties](points-out.jpg)
 
-Unsurprisingly, that's about how long a standard inner join takes to associated the 2M geonames with the 3K counties, since the anti-join has to do about that much work to determine which records do not match the join condition.
+Unsurprisingly, that's about how long a standard inner join takes to associate the 2M geonames with the 3K counties, since the anti-join has to do about that much work to determine which records do not match the join condition.
 
 
 ## Conclusion
