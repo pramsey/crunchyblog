@@ -13,6 +13,8 @@ First, your data are "encrypted at rest". That means that the "volumes" (what in
 
 Second, your connections to the database are encrypted. Transport Layer Security ("TLS", what used to be called "SSL") ensures that all the traffic between your database server and you client software is also encrypted. 
 
+![Crunchy Bridge Encryption](bridge-crypto.png)
+
 What does all this churning of bytes achieve? If we didn't do it, it would mean we'd have to trust that nobody could ever get access to the data volumes or backup files. Those items are all protected by the cloud provider login rules, so it would not be easy for someone to do, but it's not impossible, and there's one entity that can always get access to the volumes and the backups: the cloud provider itself. 
 
 Encrypting your data at rest is a way of ensuring that your system administrator (or someone who has hacked your system administrator) cannot directly read your raw data.
