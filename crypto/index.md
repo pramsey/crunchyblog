@@ -24,6 +24,22 @@ Encrypting your data at rest is a way of ensuring that your system administrator
 
 We aren't going to be talking about volume encryption or connection encryption, but encryption of the data stored inside the database tables, with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html).
 
+### Why Use PgCrypto?
+
+Maybe don't! It is just a lot simpler to **not encrypt things**. It adds **complexity** and moving parts. Don't do it unless you **need** it. 
+
+Why might you need it?
+
+Just as volume encryption and network encryption are useful if you want your data to remain private even if someone obtains access to the underlying storage, encryption of data in tables is useful if you want your data to remain private even if they obtain access to the database itself.
+
+Simplistically, you might use volume encryption if you didn't entirely trust the sysadmin. You might use [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) if you didn't entirely trust the DBA. 
+
+At the end of the day, someone somewhere needs to have access to the keys to the data. Using an application level encryption scheme like [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) moves the level of trust another layer up the application stack, at the cost (as always) of more application complexity.
+
+So, given all that: what can we do with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html)?
+
+## What PgCrypto Does
+
 Using the [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) extension, you can:
 
 * apply symmetric encryption (one secret key);
@@ -35,20 +51,6 @@ Using the [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) exte
 The [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) extension uses [OpenPGP](https://tools.ietf.org/html/rfc4880) standard functions, making it easy to move data between system components while retaining the ability to work with the payload and not have to reinvent various wheels around envelopes, integrity, and formats.
 
 [Crunchy Bridge](http://crunchybridge.com) includes [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) by default, so we can run all these examples on a standard instance.
-
-## Why Use PgCrypto?
-
-Maybe don't! It is just a lot simpler to **not encrypt things**. It adds **complexity** and moving parts. Don't do it unless you **need** it. 
-
-Why might you need it?
-
-Just as volume encryption and network encryption are useful if you want your data to remain private even if someone obtains access to the underlying storage, encryption of data in tables is useful if you want your data to remain private even if they obtain access to the database itself.
-
-Simplistically, you might use volume encryption if you didn't entirely trust the sysadmin. You might use [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) if you didn't entirely trust the DBA. 
-
-At the end of the day, someone somewhere needs to have access to the keys to the data, using an application level encryption scheme like [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) moves the level of trust another layer up the application stack. At the cost, it is important to always point out, of more application complexity.
-
-So, given all that: what can we do with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html)?
 
 
 ## Symmetric Encryption
