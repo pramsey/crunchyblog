@@ -40,9 +40,9 @@ Maybe don't! It is just a lot simpler to **not encrypt things**. It adds **compl
 
 Why might you need it?
 
-Just as volume encryption and network encryption are useful if you want your data to remain private even if someone obtains access to your underlying storage, encryption of data in tables is useful if you want your data to remain private even if they obtain access to your database itself.
+Just as volume encryption and network encryption are useful if you want your data to remain private even if someone obtains access to the underlying storage, encryption of data in tables is useful if you want your data to remain private even if they obtain access to the database itself.
 
-Simplistically, you might use volume encryption if you didn't entirely trust your sysadmin. You might use [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) if you didn't entirely trust your DBA. 
+Simplistically, you might use volume encryption if you didn't entirely trust the sysadmin. You might use [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) if you didn't entirely trust the DBA. 
 
 At the end of the day, someone somewhere needs to have access to the keys to the data, using an application level encryption scheme like [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) moves the level of trust another layer up the application stack. At the cost, it is important to always point out, of more application complexity.
 
