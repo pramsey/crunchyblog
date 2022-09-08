@@ -36,7 +36,7 @@ The [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html) extension 
 
 ## Why Use PgCrypto?
 
-Mostly, it is just a lot simpler to not encrypt things. It adds complexity and moving parts. Don't do it unless you need it. 
+Maybe don't! It is just a lot simpler to **not encrypt things**. It adds **complexity** and moving parts. Don't do it unless you **need** it. 
 
 Why might you need it?
 
