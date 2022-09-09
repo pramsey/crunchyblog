@@ -149,7 +149,7 @@ uid           [ultimate] Homer Simpson <homer@springfieldnuclear.com>
 ssb   rsa3072 2022-07-12 [E] [expires: 2024-07-11]
 ```
 
-And then extract them to files, in this case [public.key](public.key) and [public.key](public.key):
+And then extract them to files, in this case [public.key](public.key) and [secret.key](secret.key):
 
 ```
 gpg -a -o public.key --export homer@springfieldnuclear.com 
