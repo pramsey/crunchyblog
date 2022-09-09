@@ -22,13 +22,13 @@ Encrypting your data at rest is a way of ensuring that your system administrator
 
 ## PgCrypto
 
-We aren't going to be talking about volume encryption or connection encryption, but encryption of the data stored inside the database tables, with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html).
+We aren't going to be talking about volume encryption or connection encryption, but encryption of the values stored inside the database tables, with [pgcrypto](https://www.postgresql.org/docs/current/pgcrypto.html).
 
 ### Why Use PgCrypto?
 
-Maybe don't! It is just a lot simpler to **not encrypt things**. It adds **complexity** and moving parts. Don't do it unless you **need** it. 
+Maybe don't! It is just a lot simpler to **not encrypt things**. Encryption adds **complexity** and moving parts. Don't do it unless you **need** it. 
 
-Why might you need it?
+Why might you need encryption of the values stored inside the database tables?
 
 Just as volume encryption and network encryption are useful if you want your data to remain private even if someone obtains access to the underlying storage, encryption of data in tables is useful if you want your data to remain private even if they obtain access to the database itself.
 
