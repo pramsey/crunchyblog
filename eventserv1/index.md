@@ -64,7 +64,9 @@ CREATE OR REPLACE TRIGGER data_change_trigger
 
 ## LISTEN/NOTIFY
 
-Looks what is happening in the trigger function above: for every data change, the function is preparing a JSON object with the row information, and then using the `pg_notify()` function on that JSON object. Why?
+Look what is happening in the trigger function above! ⬆️⬆️⬆️ 
+
+For every data change, the function is preparing a JSON object with the row information, and then using the `pg_notify()` function on that JSON object. Why?
 
 The `pg_notify()` function is equivalent to running the PostgreSQL [NOTIFY](https://www.postgresql.org/docs/current/sql-notify.html) command. `NOTIFY` is one half of the [LISTEN](https://www.postgresql.org/docs/current/sql-listen.html)/[NOTIFY](https://www.postgresql.org/docs/current/sql-notify.html) pairing of commands.
 
