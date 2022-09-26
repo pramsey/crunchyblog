@@ -140,6 +140,8 @@ Check the web page, you should see the results there!
 
 Because the database is already serving as a central point of truth for an application data model, it makes a lot of sense to keep the point of truth in place and notify clients when the state of the model changes. 
 
+<video width="600" controls><source src="eventserv.mp4" type="video/mp4">Your browser does not support the video tag.</video> 
+
 Building real-time systems this way allows **any database client** to alter the state of the system and have that alteration propagated to all other clients in real time. 
 
 
