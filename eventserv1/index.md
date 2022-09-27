@@ -104,7 +104,7 @@ The client will then recieve all the messages sent on the "people" channel in Po
 
 ## Starting pg_eventserv
 
-The [pg_eventserv](https://github.com/crunchydata/pg_eventserv) program is just a small piece multi-threaded service written in [Go](https://go.dev/). 
+The [pg_eventserv](https://github.com/crunchydata/pg_eventserv) program is just a small multi-threaded service written in [Go](https://go.dev/). 
 
 * From the [pg_eventserv](https://github.com/crunchydata/pg_eventserv) home page download a binary suitable for your operating system and unzip it.
 * Set the `DATABASE_URL` environment variable to be a connection string for your database.
@@ -116,7 +116,6 @@ You should see the service start up and connect. If you want to see more, run wi
 INFO[0000] pg_eventserv latest                          
 INFO[0000] Run with --help parameter for commandline options 
 INFO[0000] Serving HTTP  at http://0.0.0.0:7700/        
-INFO[0000] Serving HTTPS at http://0.0.0.0:7701/        
 INFO[0000] Channels available: *                        
 INFO[0000] Connected as 'pramsey' to '' @ '/private/tmp' 
 ```
@@ -126,7 +125,7 @@ INFO[0000] Connected as 'pramsey' to '' @ '/private/tmp'
 
 Now you can create database events and see them propogated to your web browser!
 
-Connect to the [pg_eventserv](https://github.com/crunchydata/pg_eventserv) at:
+Connect to the [pg_eventserv](https://github.com/crunchydata/pg_eventserv) demonstration user interface at:
 
 ```
 http://localhost:7700
@@ -145,7 +144,7 @@ INSERT INTO people (name, age, height) VALUES ('Paul', 51, 1.9);
 INSERT INTO people (name, age, height) VALUES ('Colin', 65, 1.5);
 ```
 
-Check the web page, you should see the results there! 
+Check the web page, you should see the results there! For extra fun, open several web tabs on the demonstration page, and point them all at the same channel. Note how they all receive updates **simultaneously**.
 
 
 ## Database as Central Model
