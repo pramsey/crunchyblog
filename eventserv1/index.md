@@ -1,5 +1,15 @@
 # Real-time Database Events with pg_eventserv
 
+By combining triggers, the PostgreSQL `LISTEN/NOTIFY` system, and the [pg_eventserv](https://github.com/crunchydata/pg_eventserv) service, you can build a real-time application that keeps your web application state perfectly in sync with your database state.
+
+[pg_eventserv](https://github.com/crunchydata/pg_eventserv) converts events from the PostgreSQL event bus to standard WebSockets messages that any web client can handle.
+
+![Architecture](eventserv_arch.png)
+
+For multi-user real-time applications (like a fleet tracker, for example), this setup can be a boon! The database is the central source-of-truth, and all applications can keep on working directly on the database, no need for a fancy new event bus or system rebuild.
+
+## Your Database holds a Model
+
 A database can be thought of as a model of a real world system. Sometimes the system is something boring and abstract, like accounting ledgers, and sometimes the system is very physical, like the locations of a delivery fleet, but in most cases the database models the state of some kind of system.
 
 ![World Model](eventserv_model.png)
