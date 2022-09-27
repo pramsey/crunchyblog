@@ -6,7 +6,7 @@ By combining triggers, the PostgreSQL `LISTEN/NOTIFY` system, and the [pg_events
 
 ![Architecture](eventserv_arch.png)
 
-For multi-user real-time applications (like a fleet tracker, for example), this setup can be a boon! The database is the central source-of-truth, and all applications can keep on working directly on the database, no need for a fancy new event bus or system rebuild.
+For multi-user real-time applications (like a fleet tracker, or auction system, for example), this setup can be a boon! The database is the central source-of-truth, and all applications can keep on working directly on the database, no need for a fancy new event bus or system rebuild.
 
 ## Your Database holds a Model
 
