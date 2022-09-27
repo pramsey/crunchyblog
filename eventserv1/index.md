@@ -80,7 +80,7 @@ For every data change, the function is preparing a JSON object with the row info
 
 The `pg_notify()` function is equivalent to running the PostgreSQL [NOTIFY](https://www.postgresql.org/docs/current/sql-notify.html) command. `NOTIFY` is one half of the [LISTEN](https://www.postgresql.org/docs/current/sql-listen.html)/[NOTIFY](https://www.postgresql.org/docs/current/sql-notify.html) pairing of commands.
 
-Any PostgreSQL database client may `LISTEN` to a named channel. The `NOTIFY` command places a text payload into a named channel, and all listening clients are **immediately** informed of the new payload. This makes the `LISTEN/NOTIFY` system a great tool for ensuring that clients told when the data they are displaying has **changed** in some way.
+Any PostgreSQL database client may `LISTEN` to a named channel. The `NOTIFY` command places a text payload into a named channel, and all listening clients are **immediately** informed of the new payload. This makes the `LISTEN/NOTIFY` system a great tool for ensuring that clients are told when the data they are displaying has **changed** in some way.
 
 
 ## Notifying Web Clients with pg_eventserv
