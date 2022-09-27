@@ -85,7 +85,7 @@ Any PostgreSQL database client may `LISTEN` to a named channel. The `NOTIFY` com
 
 ## Notifying Web Clients with pg_eventserv
 
-As built, the only clients that can recieve `LISTEN/NOTIFY` messages are clients connected directly to the database using the PostgreSQL network protocol. That is actually a pretty limited selection of clients. Most modern user interfaces are built using web technologies: is there any way to pass a PostgreSQL `LISTEN/NOTIFY` message on to a web client?
+By default, the only clients that can recieve `LISTEN/NOTIFY` messages are clients connected directly to the database using the PostgreSQL network protocol. That is actually a pretty limited selection of clients. Most modern user interfaces are built using web technologies: is there any way to pass a PostgreSQL `LISTEN/NOTIFY` message on to a web client?
 
 There is now, with [pg_eventserv](https://github.com/crunchydata/pg_eventserv)! 
 
