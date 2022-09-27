@@ -144,7 +144,9 @@ INSERT INTO people (name, age, height) VALUES ('Paul', 51, 1.9);
 INSERT INTO people (name, age, height) VALUES ('Colin', 65, 1.5);
 ```
 
-Check the web page, you should see the results there! For extra fun, open several web tabs on the demonstration page, and point them all at the same channel. Note how they all receive updates **simultaneously**.
+Check the web page, you should see the results there! 
+
+For extra fun, open several web tabs on the demonstration page, and point them all at the same channel. Note how they all receive updates **simultaneously**.
 
 
 ## Database as Central Model
