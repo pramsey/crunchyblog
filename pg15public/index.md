@@ -1,31 +1,31 @@
 # Strict public in PostgreSQL 15
 
-The end is nigh! PostgreSQL has substantially tightened restrictions on the use of the "public" schema.
+The end is nigh! PostgreSQL has [substantially tightened](https://www.postgresql.org/docs/release/15.0/) restrictions on the use of the "public" schema.
 
 For developers and experimenters, one of the long-time joys of PostgreSQL has been the free-and-easy security policy that PostgreSQL has shipped with for the "public" schema.
 
-* "public" is in the default search_path, so you can always find things in it; and,
+* "public" is in the default `search_path`, so you can always find things in it; and,
 * any user can create new objects in "public"; so,
 * "just throw it in public!" has been an easy collaboration trick.
 
 However, for anyone using a database for more than 15 minutes, the implications of "loosy goosey public" are pretty clear:
 
 * "public" ends up as a garbage pile of temporary and long-abandoned tables,
-* "public" is a quiet security hole, as it tends to stay on the default search_path, sometimes in front of other schemas.
+* "public" is a quiet security hole, as it tends to stay on the default `search_path`, sometimes in front of other schemas.
 
-## The Wild West
+## Initially, The Wild West
 
 Setting up a fresh database and experimenting should be fun! 
 
 The easiest thing is to just give everybody the "postgres" super-user password. Infinite privileges and complete transparency for all! 
 
-However, this approach is limited to the earliest days of experimentation. You will need something more.
+However, this approach is limited to the earliest days of experimentation. You will need **something more** as you move into production.
 
 ## Separating User Data
 
-Eventually you will have production data, and limited access to that data, but also temporary data and experimental data and users. How to easily segment that?
+Eventually you will have production data, and need to limit access to that data, but retain temporary and experimental data and users. How can you easily segment that scratch data from production data?
 
-PostgreSQL makes it very easy to keep user data separate, because the default `search_path` starts with a "user schema":
+PostgreSQL makes it **very easy** to keep user data separate, because the default `search_path` starts with a "user schema". See that `$user` entry in the `search_path`? It's a dynamic variable that gets filled in with your user name.
 
 ```
 postgres=> show search_path;
@@ -35,7 +35,7 @@ postgres=> show search_path;
  "$user", public
 ```
 
-* First, make a basic login user. 
+* To try it out, first make a basic login user. 
 
   ```
   -- as 'postgres'
@@ -49,7 +49,7 @@ postgres=> show search_path;
   CREATE SCHEMA luser1 WITH AUTHORIZATION luser1;
   ```
 
-* Now, when `luser1` creates a table without specifying the schema, the table will be created in the first schema on their `search_path`. That schema is `$user` which expands to their user name, and there is now a schema that matches their user name.
+* Now, when `luser1` creates a table without specifying the schema, the table will be created in the **first schema** on their `search_path`. By default, the first schema is `$user` which expands to their user name, and there is now a schema that matches their user name, and thus the place the table is created!
 
   ```
   -- as 'luser1'
@@ -63,7 +63,7 @@ postgres=> show search_path;
     luser1  | my_test_data | table | luser1
   ```
 
-If you simply **create a user schema for each new login user you create**, you can neatly separate user data from other data, as each user will end up creating new tables and object inside their user schema by default.
+So, if you simply **create a user schema for each new login user you create**, you can neatly separate user data from other data, as each user will end up creating new tables and objects inside their user schema **by default**.
 
 ## Sharing User Data
 
