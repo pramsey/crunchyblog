@@ -11,7 +11,7 @@ For developers and experimenters, one of the long-time joys of PostgreSQL has be
 However, for anyone using a database for more than 15 minutes, the implications of "loosy goosey public" are pretty clear:
 
 * "public" ends up as a garbage pile of temporary and long-abandoned tables,
-* "public" is a quiet security hole, as it tends to stay on the default `search_path`, sometimes in front of other schemas.
+* "public" is a quiet [security hole](https://blog.pgguru.net/blog//devious_sql_any_function_search_path.html), as it tends to stay on the default `search_path`, sometimes in front of other schemas.
 
 ## Initially, The Wild West
 
