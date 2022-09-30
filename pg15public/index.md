@@ -1,4 +1,4 @@
-# A potential Gotcha coming in PostgreSQL 15
+# Be Ready! Public schema changes in Postgres 15
 
 The end is nigh! PostgreSQL has [substantially tightened](https://www.postgresql.org/docs/release/15.0/) restrictions on the use of the "public" schema.
 
