@@ -1,6 +1,15 @@
-# Strict public in PostgreSQL 15
+# A potential Gotcha coming in PostgreSQL 15
 
 The end is nigh! PostgreSQL has [substantially tightened](https://www.postgresql.org/docs/release/15.0/) restrictions on the use of the "public" schema.
+
+```
+user=> CREATE TABLE mydata (id integer);
+
+ERROR:  permission denied for schema public
+LINE 1: CREATE TABLE mydata (id integer);
+```
+
+NoooO! Why can I not write a table into public?
 
 For developers and experimenters, one of the long-time joys of PostgreSQL has been the free-and-easy security policy that PostgreSQL has shipped with for the "public" schema.
 
@@ -79,7 +88,7 @@ With a "user schema" setup, the same principle applies, except you also have to 
 
 ## Sharing with Roles
 
-Rather than individually granting `USAGE` and `SELECT` to every user who might want to work with their data, a user can grant to an entire class of users. If the database administrator sets of up role, that includes all the relevant users:
+Rather than individually granting `USAGE` and `SELECT` to every user who might want to work with their data, a user can grant to an entire class of users. Here the database administrator sets up a role that includes all the relevant users:
 
 ```
 -- as 'postgres'
