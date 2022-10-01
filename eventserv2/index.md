@@ -1,6 +1,6 @@
 # Moving Object Map with pg_eventserv
 
-In our [last post](), we introduced [pg_eventserv](https://github.com/crunchydata/pg_eventserv), and the concept of real-time web notifications generated from database actions.
+In our [last post](https://www.crunchydata.com/blog/real-time-database-events-with-pg_eventserv), we introduced [pg_eventserv](https://github.com/crunchydata/pg_eventserv), and the concept of real-time web notifications generated from database actions.
 
 In this post, we will dive into a practical use case: displaying state, calculating events, and tracking historical location for a set of **moving objects**.
 
