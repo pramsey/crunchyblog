@@ -137,3 +137,9 @@ Open up the [HTML page](https://github.com/CrunchyData/pg_eventserv/blob/main/ex
 
 
 ## Conclusion
+
+* Moving objects are a classic case of "system state stored in the database".
+* PostgreSQL provides the LISTEN/NOTIFY system to update clients about real-time changes.
+* The pg_eventserv service allows you to push LISTEN/NOTIFY events further out to any WebSockets client and generate a moving object map.
+* Because the state is managed in the database, storing the **historical state** of the system is trivially easy.
+
