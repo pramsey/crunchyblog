@@ -1,4 +1,4 @@
-# Moving Object Map with pg_eventserv
+# Real-time Mapping & Geofences with Postgres and pg_eventserv
 
 In our [last post](https://www.crunchydata.com/blog/real-time-database-events-with-pg_eventserv), we introduced [pg_eventserv](https://github.com/crunchydata/pg_eventserv), and the concept of real-time web notifications generated from database actions.
 
@@ -8,7 +8,7 @@ In this post, we will dive into a practical use case: displaying state, calculat
 
 This demonstration uses [pg_eventserv](https://github.com/crunchydata/pg_eventserv) for eventing, and [pg_featureserv](https://github.com/crunchydata/pg_featureserv) for external web API, and [OpenLayers](https://openlayers.org) as the map API, to build a small example application that shows off the common features of moving objects systems.
 
-[Try it out!](http://bl.ocks.org/pramsey/raw/7f12f0de2419a94a6c258f5daecf176f?raw=true)
+[Try it out!](http://s3.cleverelephant.ca/mo/moving-objects.html)
 
 ## Features
 
@@ -42,98 +42,185 @@ Changes to objects are communicated in via a web API backed by [pg_featureserv](
 ## Architecture (in detail)
 
 * The user interface generates object movements, via the arrow buttons for each object. This is in lieu of a real "moving object" fleet in the real world generating timestamped GPS tracks.
-* Every movement click on the UI fires a call to a web API, which is just a function published via [pg_featureserv](https://github.com/crunchydata/pg_featureserv), [object_move(object_id, direction)](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.sql#L266-L294).
-* The [object_move(object_id, direction)](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.sql#L266-L294) function just converts the "direction" parameter into a movement vector, and `UPDATES` the relevant row of the `objects` table.
-* The change to the `objects` table fires off the [objects_geofence()](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.sql#L92-L108) trigger, which calculates the fences the object is now in.
-* The change to the `objects` table **then** fires off the [objects_update()](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.sql#L127-L192) trigger, which:
+
+* Every movement click on the UI fires a call to a web API, which is just a function published via [pg_featureserv](https://github.com/crunchydata/pg_featureserv), `object_move(object_id, direction)`.
+
+<details><summary>postgisftw.object_move(object_id, direction)</summary>
+
+```sql
+CREATE OR REPLACE FUNCTION postgisftw.object_move(
+    move_id integer, direction text)
+RETURNS TABLE(id integer, geog geography)
+AS $$
+DECLARE
+  xoff real = 0.0;
+  yoff real = 0.0;
+  step real = 2.0;
+BEGIN
+
+  yoff := CASE
+    WHEN direction = 'up' THEN 1 * step
+    WHEN direction = 'down' THEN -1 * step
+    ELSE 0.0 END;
+
+  xoff := CASE
+    WHEN direction = 'left' THEN -1 * step
+    WHEN direction = 'right' THEN 1 * step
+    ELSE 0.0 END;
+
+  RETURN QUERY UPDATE moving.objects mo
+    SET geog = ST_Translate(mo.geog::geometry, xoff, yoff)::geography,
+        ts = now()
+    WHERE mo.id = move_id
+    RETURNING mo.id, mo.geog;
+
+END;
+$$
+LANGUAGE 'plpgsql' VOLATILE;
+```
+
+</details>
+
+* The `object_move(object_id, direction)` function just converts the "direction" parameter into a movement vector, and `UPDATES` the relevant row of the `objects` table.
+
+* The change to the `objects` table fires off the `objects_geofence()` trigger, which calculates the fences the object is now in.
+
+<details><summary>objects_geofence()</summary>
+```sql
+CREATE FUNCTION objects_geofence() RETURNS trigger AS $$
+    DECLARE
+        fences_new integer[];
+    BEGIN
+        -- Add the current geofence state to the input
+        -- tuple every time.
+        SELECT coalesce(array_agg(id), ARRAY[]::integer[])
+            INTO fences_new
+            FROM moving.geofences
+            WHERE ST_Intersects(geofences.geog, new.geog);
+
+        RAISE DEBUG 'fences_new %', fences_new;
+        -- Ensure geofence state gets saved
+        NEW.fences := fences_new;
+        RETURN NEW;
+    END;
+$$ LANGUAGE 'plpgsql';
+```
+</details>
+
+* The change to the `objects` table **then** fires off the `objects_update()` trigger, which:
   * Compares the current set of geofences to the previous set, and thus detects any enter/leave events.
   * Adds the new location of the object to the `objects_history` tracking table.
   * Composes the new location and any geofence events into a JSON object and puts it into the "objects" `NOTIFY` queue using `pg_notify()`.
+  
+<details><summary>objects_update()</summary>
+```sql
+CREATE FUNCTION objects_update() RETURNS trigger AS $$
+    DECLARE
+        channel text := 'objects';
+        fences_old integer[];
+        fences_entered integer[];
+        fences_left integer[];
+        events_json jsonb;
+        location_json jsonb;
+        payload_json jsonb;
+    BEGIN
+        -- Place a copy of the value into the history table
+        INSERT INTO moving.objects_history (id, geog, ts, props)
+            VALUES (NEW.id, NEW.geog, NEW.ts, NEW.props);
+
+        -- Clean up any nulls
+        fences_old := coalesce(OLD.fences, ARRAY[]::integer[]);
+        RAISE DEBUG 'fences_old %', fences_old;
+
+        -- Compare to previous fences state
+        fences_entered = NEW.fences - fences_old;
+        fences_left = fences_old - NEW.fences;
+
+        RAISE DEBUG 'fences_entered %', fences_entered;
+        RAISE DEBUG 'fences_left %', fences_left;
+
+        -- Form geofence events into JSON for notify payload
+        WITH r AS (
+        SELECT 'entered' AS action,
+            g.id AS geofence_id,
+            g.label AS geofence_label
+        FROM moving.geofences g
+        WHERE g.id = ANY(fences_entered)
+        UNION
+        SELECT 'left' AS action,
+            g.id AS geofence_id,
+            g.label AS geofence_label
+        FROM moving.geofences g
+        WHERE g.id = ANY(fences_left)
+        )
+        SELECT json_agg(row_to_json(r))
+        INTO events_json
+        FROM r;
+
+        -- Form notify payload
+        SELECT json_build_object(
+            'type', 'objectchange',
+            'object_id', NEW.id,
+            'events', events_json,
+            'location', json_build_object(
+                'longitude', ST_X(NEW.geog::geometry),
+                'latitude', ST_Y(NEW.geog::geometry)),
+            'ts', NEW.ts,
+            'color', NEW.color,
+            'props', NEW.props)
+        INTO payload_json;
+
+        RAISE DEBUG '%', payload_json;
+
+        -- Send the payload out on the channel
+        PERFORM (
+            SELECT pg_notify(channel, payload_json::text)
+        );
+
+        RETURN NEW;
+    END;
+$$ LANGUAGE 'plpgsql';
+```
+</details>
+
+
 * [pg_eventserv](https://github.com/crunchydata/pg_eventserv) picks the event off the `NOTIFY` queue and pushes it out to all listening clients over WebSockets.
 * The user interface recieves the JSON payload, parses it, and applies the new location to the appropriate object. If there is a enter/leave event on a geofence, the UI also changes the geofence outline color appropriately.
 
 Phew! That's a lot!
 
-* Side note, the `geofences` table also has a trigger, [layer_change()](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.sql#L209-L227) that catches insert/update/delete events and publishes a JSON notification with `pg_notify()`. This is also published by [pg_eventserv](https://github.com/crunchydata/pg_eventserv) and when the UI receives it, it simply forces a full re-load of geofence data.
+* Side note, the `geofences` table also has a trigger, `layer_change()` that catches insert/update/delete events and publishes a JSON notification with `pg_notify()`. This is also published by [pg_eventserv](https://github.com/crunchydata/pg_eventserv) and when the UI receives it, it simply forces a full re-load of geofence data.
+
+<details><summary>layer_change()</summary>
+```sql
+CREATE FUNCTION layer_change() RETURNS trigger AS $$
+    DECLARE
+        layer_change_json json;
+        channel text := 'objects';
+    BEGIN
+        -- Tell the client what layer changed and how
+        SELECT json_build_object(
+            'type', 'layerchange',
+            'layer', TG_TABLE_NAME::text,
+            'change', TG_OP)
+          INTO layer_change_json;
+
+        RAISE DEBUG 'layer_change %', layer_change_json;
+        PERFORM (
+            SELECT pg_notify(channel, layer_change_json::text)
+        );
+        RETURN NEW;
+    END;
+$$ LANGUAGE 'plpgsql';
+```
+</details>
 
 OK, all done.
 
 
-## Trying It Out
+## Trying It Out Yourself
 
-All the code and files are available in the [examples directory](https://github.com/CrunchyData/pg_eventserv/tree/main/examples/moving-objects) of `pg_eventserv`.
-
-You can run the database in [Crunchy Bridge](https://crunchybridge.com/) and the services using [Container Apps](https://docs.crunchybridge.com/container-apps/) in Crunchy Bridge.
-
-### Load Database
-
-First, load up the [moving-objects.sql](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.sql) file in your database. This creates all the tables and triggers to keep the model up-to-date. A good practice is to use the `application` user instead of the `postgres` user as the owner for the tables and triggers. That way you can connect the services using a lower-priv database user.
-
-### Start Services
-
-Now, start up the services as container apps! (This you will have to do as the `postgres` user.)
-
-This starts up `pg_featureserv`:
-
-```
-SELECT run_container('
-    -dt 
-    -p 5437:9000/tcp 
-    --log-driver k8s-file 
-    --log-opt max-size=1mb 
-    -e DATABASE_URL="postgres://application:xxxxxxxxxx@p.xxxxxxxxxx.db.postgresbridge.com:5432/dbname" 
-    -e PGFS_SERVER_HTTPPORT=9000  
-    -e PGFS_PAGING_LIMITDEFAULT=10000 
-    -e PGFS_PAGING_LIMITMAX=10000 
-    docker.io/pramsey/pg_featureserv:latest
-    ');
-```
-
-The newlines in the example above have to be stripped out before running the SQL command.
-
-This starts up `pg_eventserv`:
-
-```
-SELECT run_container('
-    -dt 
-    -p 5438:7700/tcp
-    --log-driver k8s-file 
-    --log-opt max-size=1mb 
-    -e DATABASE_URL="postgres://application:xxxxxxxx@p.xxxxxxxx.db.postgresbridge.com:5432/dbname" 
-    -e ES_HTTPPORT=7700 
-    docker.io/pramsey/pg_eventserv:latest
-');
-```
-
-Now you should be up and running! You can also just download the binaries of the two services directly and run them locally and use the default `localhost` addresses. 
-
-
-### Modify Map Client
-
-The [map client JavaScript](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.js) needs to be modified to point at your new servers, on their ports!
-
-Find the following variables and edit them to point to your services.
-
-The event server web socket host:
-
-```
-var wsHost = "ws://yourhostname:5438";
-```
-
-Note that the port is not the default service port, but the port the container is running at on Crunchy Bridge.
-
-The feature server HTTP host:
-
-```
-var fsHost = "http://yourhostname:5437";
-```
-
-If you are running the services locally, you can just leave the example code as is.
-
-
-### Try it!
-
-Open up the [HTML page](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/moving-objects.html), and you should see the working map!
+All the code and instructions are available in the [moving objects example](https://github.com/CrunchyData/pg_eventserv/blob/main/examples/moving-objects/README.md) of `pg_eventserv`.
 
 
 ## Conclusion
