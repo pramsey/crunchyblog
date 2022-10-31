@@ -117,17 +117,17 @@ Fortunately database **end users** can pretty safely ignore "pages", they are an
 
 Database **administrators** should probably know what a "page" is, because some of the tuning parameters make references to pages.
 
-Down at the level of the disk, database tables reside in files, one file per table (actually if the tables get large enough, they get multiple files, but lets ignore that for now).
+Down at the level of the disk, database tables reside in files, one file per table (actually if the tables get large enough, they get multiple files, but let's ignore that for now).
 
 If every tuple in the table were packed into a single file as tight as possible, how would the database update the data as it changed? 
 
 If it had to change someone's name from "Paul" to "Paul the Great", for example? It would have to expand the table, and move everything after the particular name entry down enough to make space for the new, larger entry. Not efficient!
 
-![Update without pages](page1.png)
+![Update without pages](page1.jpg)
 
 Enter "pages". Rather than one tightly stuffed file of data, the database internally divides the table file into regularly spaced "pages", and only partially fills each page with tuples (there's another piece of jargon for this, the "fill factor"). Now, when the database needs to update a tuple, to perhaps add more data, only the page of interest needs to be re-written, and the rest of the file can remain untouched.
 
-![Update with pages](page2.png)
+![Update with pages](page2.jpg)
 
 The "page" is in many ways the fundamental unit of the underlying database engine. You don't see it when writing SQL, but things like the "page cache" (a piece of RAM where frequently read pages are placed for high-speed access) and the "random page cost" (a tuning parameter that expresses how expensive random access within files is) testify to the centrality of the "page" in the system design of the database.
 
