@@ -63,7 +63,7 @@ SELECT ARRAY[('Peter',45),('Paul',35)]::person[];
 
 ## Relation
 
-From Codd's original paper, a "relation" is a collection of tuples. A single tuple is a "unary relation", two tuples are a "binary relation", N tuples are an "nary" relation. 
+From [Codd's original paper](https://twobithistory.org/2017/12/29/codd-relational-model.html), a "relation" is a collection of tuples. A single tuple is a "unary relation", two tuples are a "binary relation", N tuples are an "nary" relation. 
 
 But we usually call relations "tables". 
 
