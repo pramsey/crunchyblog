@@ -141,13 +141,9 @@ Toasted? What are they talking about? This is a database, not a bakery!
 
 The Postgres documentation [helpfully explains](https://www.postgresql.org/docs/current/storage-toast.html) that "TOAST" is actually an acronym, for "The Oversized-Attribute Storage Technique". 
 
-Remember how "pages" are the building block of storage in Postgres? Well, they are a fixed size (8kb), so what happens if you want to store a record that is bigger than that? Now we are in the realm of "oversized attributes". 
+Remember how "pages" are the building block of storage in Postgres? Well, they are a fixed size (8kb), so what happens if you want to store a record that is bigger than 8kb? Now we are in the realm of "oversized attributes". 
 
-Like "pages", "TOAST" is something that just magically works under the covers. When an incoming tuple is too large to fit into a page, Postgres slices it into smaller pieces that **do fit** inside a page, and puts those pieces into a special "TOAST table" associated with the main table. 
-
-![TOAST](toast1.jpg)
-
-Then, when you go to retrieve that tuple, the database has to go to the TOAST table, get the pieces and glue them back together again before returning them to you. 
+Like "pages", "TOAST" is something that just magically works under the covers and is invisible to end users. When an incoming attribute is too large to fit into a page, Postgres slices it into smaller pieces that **do fit** inside a page, and puts those pieces into a special "TOAST table" associated with the main table. 
 
 ```sql
 -- Find the toast table associated with a user visible table
@@ -157,6 +153,10 @@ JOIN pg_class b
   ON a.reltoastrelid = b.oid 
 WHERE a.relname = 'mytablename';
 ```
+
+Then, when you go to retrieve that tuple, the database goes to the TOAST table, gets the pieces and glues them back together again before returning them to you. 
+
+![TOAST](toast1.jpg)
 
 This tuple re-construction time is the main point of visibility of the TOAST system: retrieving a batch of TOASTed tuples will take longer than retrieving a similar batch of smaller tuples! Because (a) there is just more data in the TOASTed records and (b) gluing together the TOASTed pieces takes a non-zero amount of computational time.
 
