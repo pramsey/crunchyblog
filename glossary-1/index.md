@@ -131,8 +131,36 @@ Enter "pages". Rather than one tightly stuffed file of data, the database intern
 
 The "page" is in many ways the fundamental unit of the underlying database engine. You don't see it when writing SQL, but things like the "page cache" (a piece of RAM where frequently read pages are placed for high-speed access) and the "random page cost" (a tuning parameter that expresses how expensive random access within files is) testify to the centrality of the "page" in the system design of the database.
 
+Postgres pages are fixed at exactly 8192 bytes in size.  That is also the default size of memory “blocks” in areas like the WAL (write-ahead logs).  Some block sizes can be increased in configuration. Pages never can: their size is fixed at compilate time.
 
-## Conclusion
+## TOAST
+
+"Are those objects toasted?" 
+
+Toasted? What are they talking about? This is a database, not a bakery!
+
+The Postgres documentation [helpfully explains](https://www.postgresql.org/docs/current/storage-toast.html) that "TOAST" is actually an acronym, for "The Oversized-Attribute Storage Technique". 
+
+Remember how "pages" are the building block of storage in Postgres? Well, they are a fixed size (8kb), so what happens if you want to store a record that is bigger than that? Now we are in the realm of "oversized attributes". 
+
+Like "pages", "TOAST" is something that just magically works under the covers. When an incoming tuple is too large to fit into a page, Postgres slices it into smaller pieces that **do fit** inside a page, and puts those pieces into a special "TOAST table" associated with the main table. 
+
+![TOAST](toast1.jpg)
+
+Then, when you go to retrieve that tuple, the database has to go to the TOAST table, get the pieces and glue them back together again before returning them to you. 
+
+```sql
+-- Find the toast table associated with a user visible table
+SELECT a.relname, b.relname AS toast_relname 
+FROM pg_class a 
+JOIN pg_class b 
+  ON a.reltoastrelid = b.oid 
+WHERE a.relname = 'mytablename';
+```
+
+This tuple re-construction time is the main point of visibility of the TOAST system: retrieving a batch of TOASTed tuples will take longer than retrieving a similar batch of smaller tuples! Because (a) there is just more data in the TOASTed records and (b) gluing together the TOASTed pieces takes a non-zero amount of computational time.
+
+## There must be more!
 
 This is just a few of the words that get thrown around when talking about Postgres and how it works, but I bet there are enough others that we will have an expanded glossary to publish soon! 
 
