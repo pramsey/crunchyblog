@@ -33,7 +33,7 @@ CREATE FUNCTION onerow(pk integer)
   LANGUAGE 'sql';
 ```
 
-The "row" keyword is used to construct composite (tuple valued) types within SQL.
+The "row" keyword is used to construct composite (tuple valued) types within a SQL statement.
 
 ```sql
 INSERT INTO on_hand VALUES (ROW('fuzzy dice', 42, 1.99), 1000);
@@ -69,9 +69,9 @@ But we usually call relations "tables".
 
 Every table is a relation. But not every relation is a table!
 
-Views are also relations.
+For example, views are also relations.
 
-So, really, are the results of queries. A query result is a set of tuples, it is a relation! Even the intermediate steps in a query can be thought of as a relation. 
+So, really, are the **results of queries**. A query result is a set of tuples, it is a relation! Even the intermediate steps in a query can be thought of as a relation. 
 
 The result of joining two tables using a join condition? Also a relation!
 
@@ -81,7 +81,7 @@ You can get a feel for how pervasive the idea of a "relation" is in Postgres by 
 SELECT relname, relkind FROM pg_class
 ```
 
-This lists all the things Postgres considers to be "relations". You will see tables (`relkind` of "r") in the list. You will also see indexes, views, sequences, materialized views, and foreign tables.
+This query lists all the things Postgres considers to be "relations". You will see tables (`relkind` of "r") in the list. You will also see indexes, views, sequences, materialized views, and foreign tables.
 
 ## Target List and Restrictions
 
@@ -137,7 +137,7 @@ Postgres pages are fixed at exactly 8192 bytes in size.  That is also the defaul
 
 "Are those objects toasted?" 
 
-Toasted? What are they talking about? This is a database, not a bakery!
+Toasted? What are you talking about? This is a database, not a bakery!
 
 The Postgres documentation [helpfully explains](https://www.postgresql.org/docs/current/storage-toast.html) that "TOAST" is actually an acronym, for "The Oversized-Attribute Storage Technique". 
 
@@ -158,7 +158,7 @@ Then, when you go to retrieve that tuple, the database goes to the TOAST table, 
 
 ![TOAST](toast1.jpg)
 
-This tuple re-construction time is the main point of visibility of the TOAST system: retrieving a batch of TOASTed tuples will take longer than retrieving a similar batch of smaller tuples! Because (a) there is just more data in the TOASTed records and (b) gluing together the TOASTed pieces takes a non-zero amount of computational time.
+This tuple re-construction time is the main point of visibility of the TOAST system: retrieving a batch of TOASTed tuples will **take longer** than retrieving a similar batch of smaller tuples! Because (a) there is just more data in the TOASTed records and (b) gluing together the TOASTed pieces takes a non-zero amount of computational time.
 
 ## There must be more!
 
