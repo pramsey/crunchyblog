@@ -6,7 +6,7 @@ Back when I first learned SQL, calculating percentages over a set of individual 
 * First calculate the denominator of the percentage,
 * Then join that denominator back to the original table to calculate the percentage.
 
-This requires two passes of the table: once for the denominator and once for the percentage.
+This requires two passes of the table: once for the denominator and once for the percentage. For BI queries over large tables (that is, for most BI queries) more passes over the table slow performance significantly.
 
 Also, the SQL was really ugly!
 
@@ -50,7 +50,7 @@ CROSS JOIN (
 ORDER BY percent;
 ```
 
-In addition to specific windowing-only functions like `row_number()`, the PostgreSQL aggregate functions can also be used in a windowing mode. 
+In addition to specific windowing-only functions like `row_number()`, the PostgreSQL aggregate functions can also be used in a windowing mode. So we can re-write the query above like this:
 
 ```sql
 SELECT 
@@ -64,12 +64,12 @@ ORDER BY percent;
 
 Here, we get a sum of all earnings, by using the `sum()` function with the `OVER` keyword to indicate a windowing context.
 
-Since we provide no restrictionson `OVER` the effect is a sum over all rows in the result relation. Which is what we need!
+Since we provide no restrictions on `OVER` the effect is a **sum over all rows** in the result relation. Which is what we need!
 
 
 ## Percentage of Band Earnings per Musician
 
-Percentage earnings over all earnings is only one way to slide the percentage orange: maybe we want to know which musicians made the most money relative to their band earnings?
+Percentage earnings over all earnings is only one way to slice up the earnings pie: maybe we want to know which musicians made the most money relative to their band earnings?
 
 Doing this the old fashioned way, the SQL is getting a lot hairier!
 
@@ -87,7 +87,7 @@ JOIN sums USING (band)
 ORDER BY band, percent;
 ```
 
-With the index function, on the other hand, we just need to change the characteristic of the denominator. Rather than a sum of all earnings, we want the sum calculated **per band**, which we get by adding a `PARTITION` to the `OVER` clause of the window function.
+With the window function, on the other hand, we just need to change the characteristic of the denominator. Rather than a sum of all earnings, we want the sum calculated **per band**, which we get by adding a `PARTITION` to the `OVER` clause of the window function.
 
 ```sql
 SELECT 
@@ -120,5 +120,5 @@ FROM (
 
 Note that I've been forced into using a sub-query here, because embedding a window query within an aggregate is not allowed. 
 
-However, if you check the `EXPLAIN` for this query, you'll find it still only has a single scan of the main data table, which is mostly what we are trying to avoid, since these kind of BI queries are usually run against very large fact tables, and scans are the expensive bit.
+However, if you check the `EXPLAIN` for this query, you'll find it still **only has a single scan** of the main data table, which is mostly what we are trying to avoid, since these kind of BI queries are usually run against very large fact tables, and scans are the expensive bit.
 
