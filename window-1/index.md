@@ -10,7 +10,7 @@ This requires two passes of the table: once for the denominator and once for the
 
 Also, the SQL was really ugly!
 
-With modern PostgreSQL, you can calculate complex percentages over different groups in a single pass, using "[window functions](https://www.postgresql.org/docs/current/functions-window.html)".
+With modern PostgreSQL, you can **calculate complex percentages over different groups in a single pass**, using "[window functions](https://www.postgresql.org/docs/current/functions-window.html)".
 
 ## Example Data
 
