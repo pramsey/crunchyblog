@@ -1,5 +1,4 @@
-Postgres strings to arrays and back again
-
+# Postgres strings to arrays and back again
 
 One of my favourite (in an ironic sense) data formats is the "CSV in the CSV", the lowest tech approach to shipping a multi-table relational data structure in a single file. The file can be read by anything that can read CSV (which is everything?) and ships around the related data in a very readable form. 
 
@@ -12,7 +11,7 @@ Station South,"12,18,22,25,29,30,33,31,30,29,28,25,24,23,14"
 
 But how can we interact with that extra data?
 
-# Example Data
+## Example Data
 
 Here's a table to load the data into.
 
@@ -40,7 +39,7 @@ INSERT INTO weather_data VALUES
 ```
 
 
-# Arrays to the Rescue
+## Arrays to the Rescue
 
 With the data in the table, the next question is: what to do with that silly comma-separated list of temperatures? First, make it more usable by converting it to an array with the `split_to_array(string,separator)` function.
 
@@ -83,6 +82,8 @@ FROM weather_data;
  Station South |         15
 ```
 </details>
+
+## Expanding and Analyzing the Array
 
 However, by far the most fun you can have with an array like this is to `unnest(array)` it! The `unnest(array)` function is a "set returning function" which means it can return more than one row. How does that work? All the other parts of the incoming row are duplicated, so that each row has a full collection of data, like this.
 
@@ -189,6 +190,8 @@ GROUP BY station;
  Station South | 33       | 12
 ```
 </details>
+
+## Reductio ad Absurdum
 
 Finally, for completeness, if you want to keep your associated tables in a string, but just don't like commas, here's how to split and re-join your data, using a new delimiter.
 
