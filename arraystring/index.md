@@ -1,6 +1,8 @@
 # Postgres strings to arrays and back again
 
-One of my favourite (in an ironic sense) data formats is the "CSV in the CSV", the lowest tech approach to shipping a multi-table relational data structure in a single file. The file can be read by anything that can read CSV (which is everything?) and ships around the related data in a very readable form. 
+One of my favourite (in an ironic sense) data formats is the "CSV in the CSV", a CSV file in which one or more of the column is itself structured as CSV. 
+
+Putting CSV-formatted columns in your CSV file is a low tech approach to shipping a multi-table relational data structure in a single file. The file can be read by anything that can read CSV (which is everything?) and ships around the related data in a very readable form. 
 
 ```
 Station North,"-1,-4,-14,-15,-16,-15,-12,-9,-3,0,1,2"
@@ -22,7 +24,7 @@ CREATE TABLE weather_data (
 );
 ```
 
-Happily, the PostgreSQL CSV importer will correctly consume this file.
+Happily, the PostgreSQL CSV importer will correctly consume the "csv in csv" file.
 
 ```
 COPY weather_data FROM 'weather_data.csv' WITH (FORMAT csv);
