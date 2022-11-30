@@ -54,6 +54,7 @@ FROM weather_data;
 ```
 
 <details><summary>Query Result</summary>
+
 ```
     station    |                     array                      
 ---------------+------------------------------------------------
@@ -62,6 +63,7 @@ FROM weather_data;
  Station East  | {5,3,2,4,5,6,9,10,15,16,13,12,10,9,5,4,2,1}
  Station South | {12,18,22,25,29,30,33,31,30,29,28,25,24,23,14}
 ```
+
 </details>
 
 Having an array instead of a string doesn't *look* much more useful, but we can show that in fact we now have structured data by doing "array-only" things to the data, like returning the array length.
@@ -75,6 +77,7 @@ FROM weather_data;
 ```
 
 <details><summary>Query Result</summary>
+
 ```
     station    | array_size 
 ---------------+------------
@@ -83,6 +86,7 @@ FROM weather_data;
  Station East  |         18
  Station South |         15
 ```
+
 </details>
 
 ## Expanding and Analyzing the Array
@@ -98,6 +102,7 @@ FROM weather_data ;
 ```
 
 <details><summary>Query Result</summary>
+
 ```
     station    | temps 
 ---------------+-------
@@ -162,6 +167,7 @@ FROM weather_data ;
  Station South | 23
  Station South | 14
 ```
+
 </details>
 
 The data now looks a lot like something we might get by joining tables together in a standard data model, and we can actually do standard analytical things now, like figure out the temperature range at each station.
@@ -183,6 +189,7 @@ GROUP BY station;
 ```
 
 <details><summary>Query Result</summary>
+
 ```
     station    | max_temp | min_temp 
 ---------------+----------+----------
@@ -191,6 +198,7 @@ GROUP BY station;
  Station East  | 9        | 1
  Station South | 33       | 12
 ```
+
 </details>
 
 ## Reductio ad Absurdum
@@ -206,6 +214,7 @@ FROM weather_data
 ```
 
 <details><summary>Query Result</summary>
+
 ```
     station    |                    temps                     
 ---------------+----------------------------------------------
@@ -214,4 +223,5 @@ FROM weather_data
  Station East  | 5|3|2|4|5|6|9|10|15|16|13|12|10|9|5|4|2|1
  Station South | 12|18|22|25|29|30|33|31|30|29|28|25|24|23|14
 ```
+
 </details>
