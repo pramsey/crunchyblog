@@ -24,7 +24,7 @@ CREATE TABLE weather_data (
 );
 ```
 
-Happily, the PostgreSQL CSV importer will correctly consume the "[csv in csv](weatherdata.csv)" file.
+Happily, the PostgreSQL CSV importer will correctly consume the "[csv in csv](weather_data.csv)" file.
 
 ```
 COPY weather_data FROM 'weather_data.csv' WITH (FORMAT csv);
