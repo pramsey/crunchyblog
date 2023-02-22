@@ -2,7 +2,7 @@
 
 In geospatial terminology, a "raster" is a cover of an area divided into a uniform gridding, with one or more values assigned to each grid cell. 
 
-![](raster_dataset.png)
+![](raster_dataset.jpg)
 
 A "raster" in which the values are associated with red, green and blue bands might be an visual image. The rasters that come off the [Landsat 7](https://www.usgs.gov/landsat-missions/landsat-7) earth observation satellite have eight bands: red, green, blue, near infrared, shortwave infrared, thermal, mid-infrared and panchromatic. 
 
@@ -149,7 +149,7 @@ The [ST_Value(raster, geom)](https://postgis.net/docs/RT_ST_Value.html) function
 
 Summarizing rasters under polygons is more involved than reading point values, because polygons will frequently overlap multiple tiles, so you have to think in terms of "sets of raster tiles" instead of "the raster" when building your query.
 
-* We will use ST_ConvexHull(raster)](https://postgis.net/docs/RT_ST_ConvexHull.html) and [ST_Intersects(geom, geom)](https://postgis.net/docs/ST_Intersects.html) again to get the set of tiles that intersect the polygon.
+* We will use [ST_ConvexHull(raster)](https://postgis.net/docs/RT_ST_ConvexHull.html) and [ST_Intersects(geom, geom)](https://postgis.net/docs/ST_Intersects.html) again to get the set of tiles that intersect the polygon.
 
 ![](dem_basics_4.jpg)
 
