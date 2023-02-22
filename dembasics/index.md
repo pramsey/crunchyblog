@@ -183,4 +183,10 @@ max    | 2374
 
 ## Conclusion
 
-Working with database rasters analytically can be challenging, particularly if you are used to thinking about them as single, unitary coverages. 
+Working with database rasters analytically can be challenging, particularly if you are used to thinking about them as single, unitary coverages. Remember to apply the basic rules of database rasters:
+
+* Find the chips you need to answer your query.
+* Make sure to use [ST_ConvexHull(raster)](https://postgis.net/docs/RT_ST_ConvexHull.html) to drive a spatial index filter.
+* Assemble the chips as needed to answer the query (you might need to use the [ST_Union(raster)](https://postgis.net/docs/RT_ST_Union.html) aggregate).
+* Carry out your actual raster query.
+
