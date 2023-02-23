@@ -8,9 +8,11 @@ A "raster" in which the values are associated with red, green and blue bands mig
 
 ## Database Rasters
 
-Working with raster data via SQL is a little counter-intuitive: rasters don't neatly fit the relational model the way vector geometries. A table of parcels where one column is the geometry and the others are the owner name, address, and tax roll id makes sense.
+Working with raster data via SQL is a little counter-intuitive: rasters don't neatly fit the relational model the way vector geometries. 
 
-How should a raster fit into a table? As a row for every pixel? For every scan row? What other values should be associated with each row? There is no clean relationship between "real world objects" and the database representation of a raster, because a raster has nothing to say about objects, it is just a collection of measurements.
+A table of parcels where one column is the geometry and the others are the owner name, address, and tax roll id makes sense. But how should a raster fit into a table? As a row for every pixel? For every scan row? What other values should be associated with each row? 
+
+There is no clean relationship between "real world objects" and the database representation of a raster, because a raster has nothing to say about objects, it is just a collection of measurements.
 
 We can squeeze rasters into the database, but doing so makes working with the data more complex. Before loading data, we need to enable PostGIS and the raster module.
 
@@ -21,7 +23,7 @@ CREATE EXTENSION postgis_raster;
 
 ## Loading Rasters
 
-For this example, we will load raster data for "digital elevation model" (DEM), a raster with just one band, the elevation at each pixel.
+For this example, we will load raster data for a "digital elevation model" (DEM), a raster with just one band, the elevation at each pixel.
 
 Using the [SRTM Tile Grabber](https://dwtkns.com/srtm/) I downloaded one tile of old [SRTM](https://www2.jpl.nasa.gov/srtm/) data. Then using the `gdalinfo` utility, read out the metadata about the file.
 
@@ -104,7 +106,7 @@ Notice how small each tile is. As a general rule, when working with raster data 
 * the first step will be to efficiently find the relevant tile(s);
 * the second step will be to use the tiles to find the answer you want.
 
-Finding tile efficiently means using spatial index, and the spatial index defintion as we saw above is this:
+Finding tiles efficiently means using spatial index, and the spatial index defintion as we saw above is this:
 
 ```
 "srtm_12_03_st_convexhull_idx" gist (st_convexhull(rast))
