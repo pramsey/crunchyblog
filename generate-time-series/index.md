@@ -27,6 +27,9 @@ CREATE TABLE quakes (
 
 To populate the table, we pull the live [earthquake feed published by the USGS](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson).
 
+![USGS Earthquakes](quakes.jpg)
+
+
 ```sql
 CREATE OR REPLACE FUNCTION fetch_quakes()
 RETURNS setof quakes
