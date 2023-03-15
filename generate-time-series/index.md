@@ -135,11 +135,50 @@ The magic ingredient here is the `generate_series()` function. It is usually use
 
 In this example, we generated using a one day interval.
 
-## Arbitrary Bins
+## Timestamp Bins
 
-What if we want to summarize using a bin layout that doesn't neatly align with the rounding of a particularly type? What about magnitude 6 earthquakes by week?
+In PostgreSQL 14 and higher, there is a new [date_bin()](https://www.postgresql.org/docs/current/functions-datetime.html#FUNCTIONS-DATETIME-BIN) function for rounding timestamps to any stride, so you aren't restricted to just rounding to days or years or months. 
 
-We can generate the bins easily enough with `generate_series()`.
+Replacing the cast to date with `date_bin()` and ensuring that  `generate_series()` shares the same stride and start time as `date_bin()` our SQL looks almost the same.
+
+```sql
+WITH counts AS (
+    SELECT date_bin('2.5 days'::interval, ts, '2023-02-13'::timestamp), count(*)
+    FROM quakes q 
+    WHERE q.mag > 6
+    GROUP BY date_bin
+)
+SELECT series, coalesce(counts.count, 0) AS count
+FROM generate_series('2023-02-13'::timestamp, '2023-03-14'::timestamp, '2.5 days'::interval) series
+LEFT JOIN counts 
+ON counts.date_bin = series;
+```
+
+```
+       series        | count 
+---------------------+----------
+ 2023-02-13 00:00:00 |        1
+ 2023-02-15 12:00:00 |        2
+ 2023-02-18 00:00:00 |        0
+ 2023-02-20 12:00:00 |        1
+ 2023-02-23 00:00:00 |        2
+ 2023-02-25 12:00:00 |        1
+ 2023-02-28 00:00:00 |        1
+ 2023-03-02 12:00:00 |        2
+ 2023-03-05 00:00:00 |        0
+ 2023-03-07 12:00:00 |        0
+ 2023-03-10 00:00:00 |        0
+ 2023-03-12 12:00:00 |        1
+```
+
+And the result is a complete set of counts for this add 2.5 day stride.
+
+
+## Arbitrary Bins of Any Size
+
+What if we want to summarize using a bin layout that doesn't neatly align with the rounding of a particularly type? What about magnitude 6 earthquakes by week? Or in an irregular set of bins.
+
+We can generate the bins easily enough with `generate_series()`. **Note that we could also manually construct an array of irregularly spaced bin boundaries if we wanted.**
 
 ```sql
 SELECT array_agg(a) AS bins
@@ -149,7 +188,7 @@ FROM generate_series(
     '1 week'::interval) a
 ```
 
-Fortunately there is another PostgreSQL function to make use of the bins, `width_bucket()`. We can feed our bins into `width_bucket()` as an array to get back counts in each bucket.
+Fortunately there is another PostgreSQL function to make use of the bins array, `width_bucket()`. We can feed our bins into `width_bucket()` as an array to get back counts in each bucket.
 
 ```sql
 WITH a AS (
@@ -171,9 +210,9 @@ counts AS (
 SELECT * FROM counts;
 ```
 
-This is extremely flexible, as the bin width can be any interval at all: a week, 2 days, 47 hours, whatever.
+This is extremely flexible, as the bin widths can be any interval at all, or a mixed collection of widths: a week, 2 days, 47 hours, whatever.
 
-However, the result isn't very informative.
+However, the query result isn't very informative.
 
 ```
  bin | count 
@@ -232,6 +271,7 @@ We have a count for every bin, and a bottom value for every bin. Tinker with thi
 
 * [PL/Python](https://www.postgresql.org/docs/current/plpython.html) is a fun tool for dynamic HTTP data access.
 * The `generate_series()` function can create sets of floats and timestamps as well as integers.
+* The new `date_bin()` function is very handy for grouping timestamps on non-standard intervals.
 * The `width_bucket()` function is a powerful tool for creating counts of values in dynamically generated bins.
 * Pairing `unnest()` with `ORDINALITY` is a cute trick to generate row numbers to go along with row sets.
 
