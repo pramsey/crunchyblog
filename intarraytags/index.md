@@ -176,7 +176,9 @@ CREATE TABLE cats_array (
 );
 ```
 
-Now our model has just two tables, `cats_array` and `tags`. We can populate the array-based table from the relational data, so we can compare answers between models.
+Now our model has just two tables, `cats_array` and `tags`. 
+
+We can populate the array-based table from the relational data, so we can compare answers between models.
 
 <details><summary>Data Generation SQL</summary>
 
@@ -198,13 +200,13 @@ SELECT pg_size_pretty(
     pg_total_relation_size('tags'));
 ```
 
-Once the data are loaded, we need the **most important part** an index on the `cat_tags` integer array.
+Once the data are loaded, we need the **most important part** -- an index on the `cat_tags` integer array.
 
 ```sql
 CREATE INDEX cats_array_x ON cats_array USING GIN (cat_tags);
 ```
 
-This [GIN index](https://www.postgresql.org/docs/current/gin-intro.html) is a perfect fit for indexing collections (like our array) where there is a fixed and finite number of values in the collection (our ten tags). While Postgres ships with an [intarray](https://www.postgresql.org/docs/current/intarray.html) extension, the core support for arrays and array indexes have caught up with and rendered much of the extension redundant.
+This [GIN index](https://www.postgresql.org/docs/current/gin-intro.html) is a perfect fit for indexing collections (like our array) where there is a fixed and finite number of values in the collection (like our ten tags). While Postgres ships with an [intarray](https://www.postgresql.org/docs/current/intarray.html) extension, the core [support for arrays and array indexes](https://www.postgresql.org/docs/current/functions-array.html) have caught up with and rendered much of the extension redundant.
 
 As before, we will test common tag-based use cases.
 
@@ -231,8 +233,6 @@ The query hits the `cats` primary key index and returns in the **1ms** range. Gr
 
 This is the query that flumoxed our relational model. Let's jump straight to the hardest case and try to find all the cats that are "red", "brown" and "aloof".
 
-First we have to go into the `tags` table to make an array of `tag_id` entries that correspond to our tags. Then we can use the `@>` Postgresql [array operator](https://www.postgresql.org/docs/current/functions-array.html) to test to see which cats have `cat_tags` arrays that contain the query array.
-
 ```sql
 WITH tags AS MATERIALIZED (
     SELECT array_agg(tag_id) AS tag_ids
@@ -244,6 +244,8 @@ FROM cats_array
 CROSS JOIN tags
 WHERE cat_tags @> tags.tag_ids;
 ```
+
+First we have to go into the `tags` table to make an array of `tag_id` entries that correspond to our tags. Then we can use the `@>` Postgresql [array operator](https://www.postgresql.org/docs/current/functions-array.html) to test to see which cats have `cat_tags` arrays that contain the query array.
 
 The query hits the GIN index on `cat_tags` and returns the count of **26,905** cats in around **120ms**. About **seven times** faster than the same query on the relational model!
 
