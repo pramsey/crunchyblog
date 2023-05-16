@@ -287,7 +287,7 @@ Now every cat has the tag names right in the record.
 
 ### Tags of a Cat
 
-<img src='cat_tags2.png' />
+<img src='cat_tags3.png' />
 
 Since there's only one table with all the data, finding the tags of a cat is ridiculously easy.
 
