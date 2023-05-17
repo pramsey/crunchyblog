@@ -143,10 +143,20 @@ GROUP BY cat_id, cat_name;
 CREATE INDEX cats_array_x ON cats_array USING GIN (cat_tags);
 
 EXPLAIN ANALYZE
+WITH the_cat AS (
+	SELECT cat_name, cat_id, unnest(cat_tags) AS tag_id
+	FROM cats_array
+	WHERE cat_id = 779
+)
+SELECT the_cat.*, tag_name
+FROM the_cat JOIN tags USING (tag_id);
+
+
+EXPLAIN ANALYZE
 WITH tags AS MATERIALIZED (
 	SELECT array_agg(tag_id) AS tag_ids
 	FROM tags
-	WHERE tag_name IN ('red', 'brown', 'aloof', 'mouser')
+	WHERE tag_name IN ('red', 'brown', 'aloof')
 	)
 SELECT Count(*) -- cat_id, cat_tags, cat_name
 FROM cats_array
@@ -164,14 +174,6 @@ FROM cats_array, tags
 WHERE cat_id = 779
 AND cats_array.cat_tags @> ARRAY[tags.tag_id];
 
-EXPLAIN ANALYZE
-WITH the_cat AS (
-	SELECT cat_name, cat_id, unnest(cat_tags) AS tag_id
-	FROM cats_array
-	WHERE cat_id = 779
-)
-SELECT the_cat.*, tag_name
-FROM the_cat JOIN tags USING (tag_id);
 
 --------------------------------------------------------------------------------
 
@@ -191,7 +193,18 @@ GROUP BY cat_id, cat_name;
 
 CREATE INDEX cats_array_text_x ON cats_array_text USING GIN (cat_tags);
 
-SELECT Count(*) -- cat_id, cat_tags, cat_name
+SELECT Count(*) 
 FROM cats_array_text
 WHERE cat_tags @> ARRAY['red', 'brown', 'aloof', 'mouser'];
+
+--------------------------------------------------------------------------------
+
+explain analyze 
+with tag_names as (values('brown'),('aloof'),('red'),('mouser')) 
+select cat_name 
+from cats 
+where cat_id in (
+	select cat_id from cat_tags where tag_id in (
+		select tag_id from tags where tag_name in (table tag_names)) 
+group by 1 having count(*) = (select count(*) from tag_names)) ;
 

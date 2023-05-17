@@ -214,16 +214,14 @@ As before, we will test common tag-based use cases.
 
 <img src='cat_tags2.png' />
 
-The query is much less pretty! First we have to lookup the `tag_id` values in `cat_tags` and use `unnest()` to expand them out into a relation. Then we're ready to join that relation to the `tags` table to find the `tag_name` that correspond to the `tag_id`.
+The query is much less pretty! First we have to lookup the `tag_id` values in `cat_tags` and use `unnest()` to expand them out into a relation. Then we're ready to join that relation to the `tags` table to find the `tag_name` that corresponds to the `tag_id`.
 
 ```sql
-WITH the_cat AS (
-    SELECT cat_name, cat_id, unnest(cat_tags) AS tag_id
-    FROM cats_array
-    WHERE cat_id = 779
-)
-SELECT the_cat.*, tag_name
-FROM the_cat JOIN tags USING (tag_id);
+SELECT c.cat_id, c.cat_name, t.tag_name
+FROM cats_array c
+CROSS JOIN unnest(cat_tags) AS tag_id 
+JOIN tags t USING (tag_id) 
+WHERE cat_id = 779;
 ```
 
 The query hits the `cats` primary key index and returns in the **1ms** range. Great performance!
