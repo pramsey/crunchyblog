@@ -33,7 +33,7 @@ CREATE TABLE tags (
 
 </details>
 
-I filled the tables with over 1.7M entries for the `cats` and ten entries for the `tags`.
+I filled the tables with over 1.7M entries for the `cats`, ten entries for the `tags`, and 4.7M entries for the cat/tag relationship.
 
 <details><summary>Data Generation SQL</summary>
 
@@ -127,7 +127,7 @@ WHERE ta.tag_name = 'brown';
 
 ### Cats of Two Tags
 
-This is where things start to come off the rails for the relational model, because finding the just the records that have two particular tags involves quite complicated SQL.
+This is where things start to come off the rails for the relational model, because finding just the records that have **two** particular tags involves quite complicated SQL.
 
 ```sql
 SELECT Count(*)
@@ -176,7 +176,7 @@ CREATE TABLE cats_array (
 );
 ```
 
-Now our model has just two tables, `cats_array` and `tags`. 
+Now our model has just **two** tables, `cats_array` and `tags`. 
 
 We can populate the array-based table from the relational data, so we can compare answers between models.
 
@@ -237,7 +237,7 @@ WITH tags AS MATERIALIZED (
     FROM tags
     WHERE tag_name IN ('red', 'brown', 'aloof')
     )
-SELECT Count(*) -- cat_id, cat_tags, cat_name
+SELECT Count(*)
 FROM cats_array
 CROSS JOIN tags
 WHERE cat_tags @> tags.tag_ids;
@@ -250,7 +250,7 @@ The query hits the GIN index on `cat_tags` and returns the count of **26,905** c
 
 ## Performance of Arrayed Textual Cats 
 
-So if partially denormalizing our data from a "cats-cat_tags-tags" model to a "cats-tags" model makes things faster... what if we went all the way to the simplest model of all: just `cats`?
+So if partially denormalizing our data from a `cats -> cat_tags -> tags` model to a `cats -> tags` model makes things faster... what if we went all the way to the simplest model of all -- just `cats`?
 
 ```sql
 CREATE TABLE cats_array_text (
@@ -275,7 +275,7 @@ GROUP BY cat_id, cat_name;
 
 </details>
 
-The result is about **34MB** (17%) larger than the integer array version.
+The result is **234MB**, about **17%** larger than the integer array version.
 
 ```sql
 SELECT pg_size_pretty(
@@ -316,9 +316,17 @@ WHERE cat_tags @> ARRAY['red', 'brown', 'aloof'];
 This query takes about the same amount of time as the integer array based query, **120ms**.
 
 
-## Drawbacks
+## Wins and Losses
 
-So are array-based models the final answer for tag-oriented query patterns in Postgres? Maybe, but with some caveats.
+So are array-based models the final answer for tag-oriented query patterns in Postgres? On the plus side, the array models are:
+
+* Faster to query;
+* Smaller to store; and,
+* Simpler to query!
+
+Those are really compelling positives!
+
+However, there are some caveats to keep in mind when working with these models:
 
 * For the text-array model, there's no general place to lookup all tags. For a list of all tags, you will have to scan the entire `cats` table.
 * For the integer-array model, there's no way to create a simple constraint that guarantees that integers used in the `cat_tags` integer array exist in the `tags` table. You can work around this with a `TRIGGER`, but it's not as clean as a relational foreign key constraint.
