@@ -134,9 +134,11 @@ WHERE region = 'East';
 
 GDAL isn't restricted just to spreadsheet style files, it can also read into more complex files, like SQLite database files.
 
-For example, there is a SQLite example file at https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip
+For example, there is a SQLite example file at https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip 
 
-We can test our access as usual with `ogrinfo`.
+Note that the file is both **remote** and **zipped**. Fortunately, in addition to `/vsicurl/` for the HTTP request, GDAL also provides us with `/vsizip/` to treat a zip file as a virtual directory. 
+
+We can test our access as usual with `ogrinfo`, combining the `/vsicurl/` and `/vsizip/` virtual file systems. 
 
 ```
 ogrinfo /vsizip/vsicurl/https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip/chinook.db
@@ -158,7 +160,7 @@ INFO: Open of `/vsizip/vsicurl/https://www.sqlitetutorial.net/wp-content/uploads
 13: tracks (None)
 ```
 
-And then set up the FDW.
+Now we set up the FDW, using that same GDAL connection string.
 
 ```sql
 CREATE SERVER sqlite_server
