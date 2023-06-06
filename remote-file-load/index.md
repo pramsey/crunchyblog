@@ -140,6 +140,49 @@ SELECT col[1]::integer AS year,
 Whenever you want to refresh, just `TRUNCATE` the table and re-run the population query. Unlike the `COPY` method, this doesn't require super-user access to implement.
 
 
+## Remote Access with PL/Python
+
+The `http` extension is simple, but it leaves a lot of work on the server side. PL/Python is capable of doing remote HTTP access, and it also has a lot of nice string parsing tools that could maybe result in a more pleasant output.
+
+```python
+CREATE EXTENSION IF NOT EXISTS plpython3u;
+
+CREATE OR REPLACE FUNCTION read_csv_from_url(url TEXT)
+RETURNS SETOF RECORD
+AS $$
+  import csv
+  import requests
+  from io import StringIO
+
+  # Make a GET request to the URL and retrieve the CSV data
+  response = requests.get(url)
+  response.raise_for_status()
+  csv_data = response.text
+  
+  # Parse the CSV data
+  reader = csv.reader(StringIO(csv_data))
+  
+  # Skip the header row
+  next(reader, None)
+  
+  # Yield each row as a result
+  for row in reader:
+      yield tuple(row)
+$$ LANGUAGE 'plpython3u';
+```
+
+Using a set returning function, it is much easier to integrate the function into the database infrastructure, so we can make the data available via a `MATERIALIZED VIEW`.
+
+```sql
+CREATE MATERIALIZED VIEW popn_python AS
+SELECT * 
+  FROM read_csv_from_url('https://docs.google.com/spreadsheets/d/1pBbCabAK6u6EIuyu_2XUul4Yxvf2w_Od6QYC_yEc4q4/gviz/tq?tqx=out:csv&sheet=Population_projections') 
+    AS f(year integer, age_18_to_19 integer, all_ages integer);
+```
+
+Updating the remote data just needs a `REFRESH MATERIALIZED VIEW`, and super user access is not required.
+
+
 ## Remote Access with FDW
 
 Our last remote access trick uses a "[foreign data wrapper](https://www.postgresql.org/docs/current/ddl-foreign-data.html)", specifically the [OGR FDW](https://github.com/pramsey/pgsql-ogr-fdw/) which exposes the multi-format access capabilities of the [GDAL](https://gdal.org) library to PostgreSQL.
@@ -221,6 +264,7 @@ As with the `http` approach and unlike using `COPY`, the FDW approach does not r
 * There are lots of ways to access remote data! 
   * Using `COPY` with `PROGRAM` is simple but requires superuser powers and only reads CSV.
   * Using the `http` extension is simple to get data but requires parsing it yourself on the database side.
+  * Using a PL/Python function results in a short and reusable piece of code, and does not require super user powers.
   * Using the `ogr_fdw` extension involves some fiddly setup but is nice and clean once it is up and running. It can also read vastly more different file formats and data services.
 
 
