@@ -86,7 +86,7 @@ CREATE TABLE lon_0 AS
     4326)::geometry(LineString, 4326) AS geom;
 ```
 
-Then we apply that blade to all the shapes that full under it.
+Then we apply that blade to all the shapes that fall under it.
 
 ```sql
 CREATE TABLE split_at_0 AS
@@ -140,7 +140,7 @@ The two-dimensional form of the function looks like this:
 ST_Affine(geom, a, b, d, e, xoff, yoff)
 ```
 
-Where the parameter correspond to an affine transformation matrix like this:
+Where the parameters correspond to an affine transformation matrix:
 
 ```
 a  b  xoff
@@ -165,7 +165,7 @@ From the equation it is pretty clear, we want to negate the input **x** and leav
 
 In order to get a pretty map, we'd like the output data to be centered on the prime meridian again, so:
 
-* xoff = 90
+* xoff = -90
 * yoff = 0
 
 And in SQL like this:
@@ -189,7 +189,7 @@ CREATE TABLE places_affine AS
   ORDER BY pop_max DESC;
 ```
 
-And the final result on the map looks like this:
+And the final result on the map looks like the [XKCD map](https://xkcd.com/2807/), without the pretty hand-labelling and mountains:
 
 ![abs(longitude)](xkcd6.png)
 
