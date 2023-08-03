@@ -23,7 +23,7 @@ A colleague asked me if we could recreate [ABS(Longitude)](https://xkcd.com/2807
 At a minimum, we want a countries layer and some independent place labels to provide context, which is available at the first stop for basic global data, [Natural Earth](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/
 ).
 
-We have been playing with `[ogr2ogr](https://gdal.org/programs/ogr2ogr.html)` and weird [remote access tricks](https://www.crunchydata.com/blog/remote-access-anything-from-postgres) lately, so I used `ogr2ogr` to load the data in one step.
+We have been playing with [ogr2ogr](https://gdal.org/programs/ogr2ogr.html) and weird [remote access tricks](https://www.crunchydata.com/blog/remote-access-anything-from-postgres) lately, so I used `ogr2ogr` to load the data in one step.
 
 ```bash
 # Load the countries and places directly from the remote
