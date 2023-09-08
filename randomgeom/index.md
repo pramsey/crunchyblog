@@ -1,10 +1,10 @@
 # Random Geometry Generator
 
-A user on the [postgis-users](https://lists.osgeo.org/mailman/listinfo/postgis-users) had an interesting question today: how to generate a geometry column in PostGIS with random points, linestrings, and polygons.
+A user on the [postgis-users](https://lists.osgeo.org/mailman/listinfo/postgis-users) had an interesting question today: how to generate a geometry column in PostGIS with random points, linestrings, or polygons.
 
 ## Random Points
 
-Random points is pretty easy: define an area of interest and then use the PostgreSQL [random()](https://pgpedia.info/r/random.html) function to create the X and Y values in that area.
+Random points is pretty easy -- define an area of interest and then use the PostgreSQL [random()](https://pgpedia.info/r/random.html) function to create the X and Y values in that area.
 
 ```sql
 CREATE TABLE random_points AS 
@@ -84,7 +84,7 @@ $$ LANGUAGE plpgsql;
 
 ## Random Linestrings
 
-Linestrings are a little harder. There is no formal rule that says a line string shouldn't self-intersect, but aesthetically we are happier if it doesn't.
+Linestrings are a little harder, because they involve more points, and aesthetically we like to avoid self-crossings of lines.
 
 Two-point linestrings are pretty easy to generate with [ST_MakeLine()](https://postgis.net/docs/en/ST_MakeLine.html), just generate twice as many random points, and use them as the start and end points of the linestrings.
 
@@ -111,6 +111,10 @@ CREATE TABLE random_2point_lines AS
 ![](random_2lines.jpg)
 
 Multi-point random linestrings are harder, at least while avoiding self-intersections, and there are a lot of potential approaches. While a [recursive CTE](https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-RECURSIVE) could probably do it, an imperative approach using PL/PgSQL is more readable.
+
+The `generate_random_linestring()` function starts with an empty linestring, and then adds on new segments one at a time, changing the direction of the line with each new segment.
+
+<details><summary>The full generate_random_linestring() definition.</summary>
 
 ```sql
 CREATE OR REPLACE FUNCTION generate_random_linestring(
@@ -152,13 +156,15 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+```
 
+</details>
+
+```sql
 CREATE TABLE random_lines AS 
   WITH bounds AS (
-    SELECT 0 AS origin_x,
-           0 AS origin_y,
-           80 AS width,
-           80 AS height
+    SELECT 0 AS origin_x, 80 AS width, 
+           0 AS origin_y, 80 AS height
   )
   SELECT id, 
     generate_random_linestring(
@@ -179,10 +185,8 @@ At the simplest level, a set of random boxes is a set of random polygons, but th
 ```sql
 CREATE TABLE random_boxes AS 
   WITH bounds AS (
-    SELECT 0 AS origin_x,
-           0 AS origin_y,
-           80 AS width,
-           80 AS height
+    SELECT 0 AS origin_x, 80 AS width,
+           0 AS origin_y, 80 AS height
   )
   SELECT ST_MakeEnvelope(
   	       random_normal(origin_x, width/4), 
@@ -200,7 +204,7 @@ CREATE TABLE random_boxes AS
 
 But more interesting polygons have curvy and convex shapes, how can we generate those?
 
-## Random Polygons with Concave Hull
+### Random Polygons with Concave Hull
 
 One way is to extract a polygon from a set of random points, using [ST_ConcaveHull()](https://postgis.net/docs/en/ST_ConcaveHull.html), and then applying a "erode and dilate" effect to the shape by combining a negative and positive buffer operation.
 
@@ -260,7 +264,7 @@ CREATE TABLE random_hulls AS
 ![](random_hulls.jpg)
 
 
-## Random Polygons with Voronoi Polygons
+### Random Polygons with Voronoi Polygons
 
 Another approach is to again start with random points, but use the [Voronoi diagram](https://en.wikipedia.org/wiki/Voronoi_diagram) as the basis of the polygon.
 
@@ -276,7 +280,7 @@ Use the [ST_VoronoiPolygons()](https://postgis.net/docs/en/ST_VoronoiPolygons.ht
 
 ![](voronoi4.jpg)
 
-Select out just the polygons that are fully contained in the originating circle.
+Filter just the polygons that are fully contained in the originating circle.
 
 ![](voronoi5.jpg)
 
