@@ -55,7 +55,7 @@ CREATE TABLE random_normal_points AS
 
 ![](random_normal_points.jpg)
 
-<details><summary>For PostgreSQL versions before 16, here is a replacement.</summary>
+<details><summary>For PostgreSQL versions before 16, here is a user-defined version of `random_normal()`.</summary>
 
 ```sql
 CREATE OR REPLACE FUNCTION random_normal(
@@ -86,15 +86,13 @@ $$ LANGUAGE plpgsql;
 
 Linestrings are a little harder, because they involve more points, and aesthetically we like to avoid self-crossings of lines.
 
-Two-point linestrings are pretty easy to generate with [ST_MakeLine()](https://postgis.net/docs/en/ST_MakeLine.html), just generate twice as many random points, and use them as the start and end points of the linestrings.
+Two-point linestrings are pretty easy to generate with [ST_MakeLine()](https://postgis.net/docs/en/ST_MakeLine.html) -- just generate twice as many random points, and use them as the start and end points of the linestrings.
 
 ```sql
 CREATE TABLE random_2point_lines AS 
   WITH bounds AS (
-    SELECT 0 AS origin_x,
-           0 AS origin_y,
-           80 AS width,
-           80 AS height
+    SELECT 0 AS origin_x, 80 AS width,
+           0 AS origin_y, 80 AS height
   )
   SELECT ST_MakeLine(
   	       ST_Point(random_normal(origin_x, width/4), 
@@ -114,7 +112,7 @@ Multi-point random linestrings are harder, at least while avoiding self-intersec
 
 The `generate_random_linestring()` function starts with an empty linestring, and then adds on new segments one at a time, changing the direction of the line with each new segment.
 
-<details><summary>The full generate_random_linestring() definition.</summary>
+<details><summary>Here is the full generate_random_linestring() definition.</summary>
 
 ```sql
 CREATE OR REPLACE FUNCTION generate_random_linestring(
@@ -190,9 +188,9 @@ CREATE TABLE random_boxes AS
   )
   SELECT ST_MakeEnvelope(
   	       random_normal(origin_x, width/4), 
-  	       random_normal(origin_y, width/4), 
+  	       random_normal(origin_y, height/4), 
   	       random_normal(origin_x, width/4), 
-  	       random_normal(origin_y, width/4)
+  	       random_normal(origin_y, height/4)
   	     )::Geometry(Polygon, 4326) AS geom,
          id
     FROM bounds, 
@@ -206,7 +204,7 @@ But more interesting polygons have curvy and convex shapes, how can we generate 
 
 ### Random Polygons with Concave Hull
 
-One way is to extract a polygon from a set of random points, using [ST_ConcaveHull()](https://postgis.net/docs/en/ST_ConcaveHull.html), and then applying a "erode and dilate" effect to the shape by combining a negative and positive buffer operation.
+One way is to extract a polygon from a set of random points, using [ST_ConcaveHull()](https://postgis.net/docs/en/ST_ConcaveHull.html), and then applying an "erode and dilate" effect to make the curves more pleasantly round.
 
 We start with a random center point for each polygon, and create a circle with [ST_Buffer()](https://postgis.net/docs/en/ST_Buffer.html).
 
@@ -220,15 +218,17 @@ Then use [ST_ConcaveHull()](https://postgis.net/docs/en/ST_ConcaveHull.html) to 
 
 ![](hull3.jpg)
 
-Then apply a negative buffer, to dilate the shape.
+Then apply a negative buffer, to erode the shape.
 
 ![](hull4.jpg)
 
-And finally a positive buffer to fluff it back out again.
+And finally a positive buffer to dilate it back out again.
 
 ![](hull5.jpg)
 
-Generating multiple hulls involves stringing together some operations with CTEs or subqueries.
+Generating multiple hulls involves stringing together all the above operations with CTEs or subqueries.
+
+<details><summary>Here is the full query to generate multiple polygons with the concave hull method.</summary>
 
 ```sql
 CREATE TABLE random_hulls AS 
@@ -261,6 +261,8 @@ CREATE TABLE random_hulls AS
     FROM pts;
 ```
 
+</details>
+
 ![](random_hulls.jpg)
 
 
@@ -288,7 +290,9 @@ And then use [ST_Union()]() to merge those polygons into a single output shape.
 
 ![](voronoi6.jpg)
 
-Generating multiple hulls again involves stringing together some operations with CTEs or subqueries.
+Generating multiple hulls again involves stringing together the abovee operations with CTEs or subqueries.
+
+<details><summary>Here is the full query to generate multiple polygons with the Voronoi method.</summary>
 
 ```sql
 CREATE TABLE random_delaunay_hulls AS 
