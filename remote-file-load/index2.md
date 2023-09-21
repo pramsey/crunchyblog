@@ -192,3 +192,7 @@ WHERE title ~ '^Ar';
 
 * The [ogr_fdw](https://github.com/pramsey/pgsql-ogr-fdw/) extension provides flexible access to remote data in [dozens of formats]((https://gdal.org/drivers/vector/index.html).
 * When using FDW for real-time access it is frequently wise to place a `MATERIALIZED VIEW` between your queries and the FDW, to avoid network latency.
+
+
+
+
