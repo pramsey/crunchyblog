@@ -29,13 +29,13 @@ We have been playing with [ogr2ogr](https://gdal.org/programs/ogr2ogr.html) and 
 # Load the countries and places directly from the remote
 # zip file into the working PostgreSQL database
 
-ogr2ogr \
- -f PostgreSQL \
- -nlt PROMOTE_TO_MULTI \
- -lco OVERWRITE=yes \
- -lco GEOMETRY_NAME=geom \
- postgresql://postgres@localhost/xkcd \
- /vsizip//vsicurl/https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
+  ogr2ogr \
+   -f PostgreSQL \
+   -nlt PROMOTE_TO_MULTI \
+   -lco OVERWRITE=yes \
+   -lco GEOMETRY_NAME=geom \
+   postgresql://postgres@localhost/xkcd \
+   /vsizip//vsicurl/https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
 
 ogr2ogr \
  -f PostgreSQL \
