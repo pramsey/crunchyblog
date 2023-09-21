@@ -158,6 +158,8 @@ LANGUAGE plpgsql;
 
 </details>
 
+We can use the `generate_random_linestring()` function now to turn random start points (created in the usual way) into fully random squiggly lines!
+
 ```sql
 CREATE TABLE random_lines AS 
   WITH bounds AS (
