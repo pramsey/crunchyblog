@@ -109,9 +109,9 @@ By default, on start-up PostgreSQL sets up a seed value by calling an external r
 * using Windows `CryptGenRandom()` on that platform, or
 * using the operating system `/dev/urandom` if necessary.
 
-So if you are interested in in a random number, just calling `random()` will get you one every time.
+So if you are interested in a random number, just calling `random()` will get you one every time.
 
-But if you want to put your finger on the scales, you can use the `setseed()` to cause your `random()` function to generate a deterministic series of random numbers, starting from a seed you specify.
+But if you want to put your finger on the scales, you can use the `setseed()` function to cause your `random()` functions to generate a deterministic series of random numbers, starting from a seed value you specify.
 
 
 ## Random Rows and Values
@@ -144,7 +144,7 @@ LIMIT 1
 
 As you can imagine, this gets quite expensive if the `fruits` table gets too large, since it sorts the whole table every time.
 
-If you only need a single random row, one way to acheive that is to add a random column to your table and index it.
+If you only need a single random row, one way to achieve that is to add a random column to your table and index it.
 
 ```sql
 CREATE TABLE fruits 
@@ -165,9 +165,9 @@ ORDER BY random ASC
 LIMIT 1
 ```
 
-Be careful using this trick for more than one row though: since the value of the random column is fixed, the sequences of rows returned will be deterministic, even if the start row is random.
+Be careful using this trick for more than one row though: since the values in the random column are fixed, the sequences of rows returned will be deterministic, even if the start row is random.
 
-If you want to pull large portions of a table into a query (for random sampling, for example) and even apply SQL filters and joins, look at the `TABLESAMPLE` clause of the [SELECT](https://www.postgresql.org/docs/current/sql-select.html) command.
+If you want to pull large portions of a table into a query (for random sampling, for example) look at the `TABLESAMPLE` clause of the [SELECT](https://www.postgresql.org/docs/current/sql-select.html) command.
 
 
 ## Other Distributions
@@ -182,7 +182,7 @@ The position of the center of the distribution is the "mean" and the rate of pro
 
 ![](normal_random.jpg)
 
-To generate normally distributed data in PostgreSQL, use the `random_norma(mean, stddev)` function that was introduced in [version 16]([just a few](https://www.postgresql.org/docs/current/functions-math.html#FUNCTIONS-MATH-RANDOM-TABLE)).
+To generate normally distributed data in PostgreSQL, use the `random_normal(mean, stddev)` function that was introduced in [version 16](https://www.postgresql.org/docs/current/functions-math.html#FUNCTIONS-MATH-RANDOM-TABLE).
 
 ```sql
 SELECT random_normal(0, 1)
@@ -190,16 +190,30 @@ FROM generate_series(1,10)
 ORDER BY 1
 ```
 
+```
+ -0.8147201382612904
+ -0.5751449000210354
+ -0.4643454485382744
+ -0.0630592935151314
+ 0.26438942114339203
+ 0.39298889191244274
+  0.4946046063256206
+  0.8560911955145666
+  1.3534309793797454
+   1.664493506727331
+```
+
 It's kind of hard to appreciate that the data have a central tendency without generating a lot more of them and counting how many fall within each bin.
 
 ```sql
-SELECT random_normal()::integer, Count(*)
+SELECT random_normal()::integer, 
+       Count(*)
 FROM generate_series(1,1000)
 GROUP BY 1
 ORDER BY 1
 ```
 
-The cast to `integer` rounds the values towards the nearest integer, so you can see how the data are mosting between the first two standard deviations of the mean.
+The cast to `integer` rounds the values towards the nearest integer, so you can see how the data are mostly between the first two standard deviations of the mean.
 
 ```
  random_normal | count 
