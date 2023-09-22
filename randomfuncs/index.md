@@ -132,7 +132,11 @@ WITH f AS (
 SELECT fruits[ceil(array_length(fruits,1) * random())] AS snack
 FROM f;
 ```
-
+```
+ snack 
+-------
+ peach
+```
 Getting a random row involves some tradeoffs and thinking. For a random value from a small table, the naive way to get a single random value is this.
 
 ```sql
@@ -142,18 +146,26 @@ ORDER BY random()
 LIMIT 1
 ```
 
+![](fruit_table.jpg)
+
 As you can imagine, this gets quite expensive if the `fruits` table gets too large, since it sorts the whole table every time.
 
 If you only need a single random row, one way to achieve that is to add a random column to your table and index it.
 
 ```sql
-CREATE TABLE fruits 
-  id INTEGER PRIMARY KEY,
+CREATE TABLE fruits (
+  id SERIAL PRIMARY KEY,
   fruit TEXT NOT NULL,
   random FLOAT8 DEFAULT random()
+  );
+
+INSERT INTO fruits (fruit) 
+  VALUES ('apple'),('banana'),('cherry'),('pear'),('peach');
 
 CREATE INDEX fruits_random_x ON fruits (random);
 ```
+
+![](fruit_table_big.jpg)
 
 Then when it's time to search, use the random function to generate a starting search location and find the next highest value.
 
@@ -162,13 +174,47 @@ SELECT *
 FROM fruits
 WHERE random > random()
 ORDER BY random ASC
-LIMIT 1
+LIMIT 1;
+```
+
+```
+ id | fruit  |       random       
+----+--------+--------------------
+  8 | banana | 0.1997961574379754
 ```
 
 Be careful using this trick for more than one row though: since the values in the random column are fixed, the sequences of rows returned will be deterministic, even if the start row is random.
 
 If you want to pull large portions of a table into a query (for random sampling, for example) look at the `TABLESAMPLE` clause of the [SELECT](https://www.postgresql.org/docs/current/sql-select.html) command.
 
+
+## Random Groups
+
+Suppose I wanted the entire contents of the fruits collection, but returned in two random groups? This is actually much like getting a single random value: order the whole set randomly, and then use that ordering to determine grouping.
+
+```sql
+WITH random_fruits AS (
+    SELECT id, fruit
+    FROM fruits 
+    ORDER BY random()
+)
+SELECT row_number() over () % 2 AS group, 
+       id, fruit
+FROM random_fruits
+ORDER BY 1;
+```
+
+```
+ group | id | fruit  
+-------+----+--------
+     0 | 11 | peach
+     0 |  8 | banana
+     1 | 10 | pear
+     1 |  7 | apple
+     1 |  9 | cherry
+```
+
+The '2' in the example above is the number of groups desired. 
 
 ## Other Distributions
 
