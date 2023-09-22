@@ -52,12 +52,12 @@ SELECT 10 * random() FROM generate_series(1, 5)
 5.5245437635689125
 ```
 
-Then, if you push every one of those numbers up to the nearest integer using `ceil()` you'll end up with a random integer between 1 and 10. 
+Then, if you push every one of those numbers down to the nearest integer using `floor()` you'll end up with a random integer between 0 and 9. 
 
-![](integer_random_10.jpg)
+![](integer_random_9.jpg)
 
 ```sql
-SELECT ceil(10 * random()) FROM generate_series(1, 5)
+SELECT floor(10 * random()) FROM generate_series(1, 5)
 ```
 
 ```
@@ -68,13 +68,13 @@ SELECT ceil(10 * random()) FROM generate_series(1, 5)
 6
 ```
 
-If you wanted a randeom integer between 0 and 9, you could do the same thing, but pushing the floating numbers **down** to the next lowest integer using `floor()`.
+If you wanted a random integer between 1 and 10, you just need to add 1 to the zero-base number.
 
-![](integer_random_9.jpg)
+![](integer_random_10.jpg)
 
 
 ```sql
-SELECT floor(10 * random()) FROM generate_series(1, 5)
+SELECT floor(10 * random()) + 1 FROM generate_series(1, 5)
 ```
 
 ```
@@ -118,7 +118,7 @@ But if you want to put your finger on the scales, you can use the `setseed()` fu
 
 Some times the things you are trying to do randomly aren't numbers. How do you get a random entry out of a string? Or a random row from a table?
 
-We already saw how to get one-based integers from `random()` and we can apply that technique to the problem of pulling an entry from an array.
+We already saw how to get one-based integers from `random()` and we can apply that technique to the problem of pulling an entry from an array (since PostgreSQL array access is one-based).
 
 ```sql
 WITH f AS (
@@ -129,14 +129,16 @@ WITH f AS (
         'pear', 
         'peach'] AS fruits
 )
-SELECT fruits[ceil(array_length(fruits,1) * random())] AS snack
+SELECT fruits[floor(array_length(fruits,1) * random())+1] AS snack
 FROM f;
 ```
+
 ```
  snack 
 -------
  peach
 ```
+
 Getting a random row involves some tradeoffs and thinking. For a random value from a small table, the naive way to get a single random value is this.
 
 ```sql
