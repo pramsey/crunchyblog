@@ -125,7 +125,7 @@ CREATE TABLE geonames_popplaces AS
   GROUP BY cluster, admin1
 ```
 
-Now we have completed the analysis, converting the density different in school locations into a set of derived populated place points.
+We have completed the analysis, converting the density different in school locations into a set of derived populated place points.
 
 ![Kanakee](sch_centroid.jpg)
 
