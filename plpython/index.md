@@ -157,43 +157,35 @@ RETURNS boolean AS $$
     # Utility function to run a system command and return the 
     # resulting message string
     #
-    errcode = 0
-    def run_command(cmd):
-        global errcode
+    def run_cmd(cmd):
+        errcode = True
         try:
             output = subprocess.check_output([cmd], stderr=subprocess.STDOUT, shell=True, universal_newlines=True)
         except subprocess.CalledProcessError as e:
-            errcode = 1
+            errcode = False
             output = str(e.output)
-        return output.strip()
+        plpy.notice(output.strip())
+        return errcode
     #
     # Do we even have python on the path?
     #
-    plpy.notice(run_command("which python3"))
-    if errcode > 0:
+    if not run_cmd("which python3"):
         return False
     #
     # Does python have the PIP package manager?
     #
-    plpy.notice(run_command("python3 -m ensurepip --version"))
-    if errcode > 0:
-        plpy.notice(run_command("python3 -m ensurepip --default-pip"))
-        if errcode > 0:
+    if not run_cmd("python3 -m ensurepip --version"):
+        if not run_cmd("python3 -m ensurepip --default-pip"):
             return False 
     #
     # Make sure PIP is working
-    #
-    plpy.notice(run_command("python3 -m pip --version"))
-    if errcode > 0:
+    #    
+    if not run_cmd("python3 -m pip --version"):
         return False
     #
-    # Install the requested module
+    # Attempt to install the requested module
     #
-    plpy.notice(run_command("python3 -m pip install " + name))
-    if errcode > 0:
-        return False
-    else:
-        return True
+    return run_cmd("python3 -m pip install " + name)
     
 $$ LANGUAGE 'plpython3u' VOLATILE;
 ```
