@@ -25,7 +25,7 @@ A trusted language is one that you would feel confident in allowing any of your 
 
 An un-trusted language is... not that. Functions in an un-trusted language have the potential to access capabilities outside the database itself. PL/Python is untrusted, and as we will see, it allows easy access to the filesystem of the database host. Functions written in C can access memory throughout the PostgreSQL system. 
 
-Sounds scary! Fortunately, untrusted languages have a big safety net under them: by default, only the PostgreSQL super user is allowed to create functions in an untrusted language.
+Sounds scary! Fortunately, untrusted languages have a **big safety net** under them: by default, only the PostgreSQL super user is allowed to create functions in an untrusted language.
 
 
 ## Untrusted Functions and Permission
@@ -105,7 +105,7 @@ $$ LANGUAGE 'plpython3u' VOLATILE;
 
 The commands are all run using the system user account the database runs as. Usually this is **also** named `postgres` just like the in-database super user, but it's important to note that the system user is distinct.
 
-Unlike the database super user, the system user is usually deliberately created with relatively privilege and scope of access, precisely because the database super use is able to do what we are demonstrating here: run any command it wants on the system.
+Unlike the database super user, the system user is usually deliberately created with relatively low privilege and scope of access, precisely because the database super use is able to do what we are demonstrating here -- run any command it wants on the system.
 
 ```sql
 SELECT shell('ls');
@@ -134,7 +134,7 @@ SELECT shell('ls');
 
 The database backend is running with the database cluster directory as the working directory, so running `ls` shows us the the files and directory that make up the cluster.
 
-Can you hose your system very easily from here? Oh yes you can. These are the real files under your database, and if you remove them, your database will begin to fall apart. 
+Can you hose your system very easily from here? Oh **yes you can**. These are the real files under your database, and if you remove them, your database will begin to fall apart. 
 
 However, system access does not necessarily need to be used for **evil**, sometimes it can be used for good.
 
@@ -154,7 +154,7 @@ RETURNS boolean AS $$
     import subprocess
 
     # 
-    # Function to run a system command and return the 
+    # Utility function to run a system command and return the 
     # resulting message string
     #
     errcode = 0
