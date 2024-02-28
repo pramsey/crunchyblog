@@ -37,6 +37,8 @@ What can you do with untrusted functions? Things both terrible and amazing.
 You will have to be a super user to try out these functions, which usually means connecting to the database as the `postgres` user.
 
 ```sql
+CREATE EXTENSION plpython3u;
+
 CREATE OR REPLACE FUNCTION df()
 RETURNS text AS $$
 
@@ -207,12 +209,15 @@ REVOKE EXECUTE ON FUNCTION install_python_module FROM application;
 
 However, when run as super user, it does what we want.
 
+```sql
+SELECT install_python_module('nameparser');
+```
 ```
 NOTICE:  /usr/bin/python3
 NOTICE:  pip 21.3.1
-NOTICE:  pip 21.3.1 from /home/ec2-user/.local/lib/python3.9/site-packages/pip (python 3.9)
+NOTICE:  pip 21.3.1 from /var/lib/pgsql/.local/lib/python3.9/site-packages/pip (python 3.9)
 NOTICE:  Defaulting to user installation because normal site-packages is not writeable
-Requirement already satisfied: nameparser in /home/ec2-user/.local/lib/python3.9/site-packages (1.1.3)
+Requirement already satisfied: nameparser in /var/lib/pgsql/.local/lib/python3.9/site-packages (1.1.3)
 WARNING: You are using pip version 21.3.1; however, version 24.0 is available.
 You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
  install_python_module 
@@ -226,7 +231,10 @@ Now it's an easy thing to write a function that takes in a name string, and pars
 CREATE OR REPLACE FUNCTION parse_name(name text)
 RETURNS TABLE(title text, first text, middle text, last text, suffix text) 
 AS $$
-    
+
+    import sys
+    sys.path.append('/var/lib/pgsql/.local/lib/python3.9/site-packages/')
+
     from nameparser import HumanName
     name_obj = HumanName(name)
     return [(
