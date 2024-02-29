@@ -1,14 +1,14 @@
 
 # Don't Trust, and Verify
 
-PostgreSQL is a pretty unique database, in that it has multiple available server-side languages for writing server functions and triggers. Some of those languages are built-in, such as
-[PL/PgSQL](https://www.postgresql.org/docs/current/plpgsql.html),
-[PL/Python](https://www.postgresql.org/docs/current/plpython.html),
-[PL/TCL](https://www.postgresql.org/docs/current/pltcl.html), and
-[PL/Perl](https://www.postgresql.org/docs/current/plperl.html).
+PostgreSQL has a uniquely large collection of server-side languages for writing functions and triggers. 
 
-And (here is the amazing part) there are also lots of languages that are run-time add-ons, like
-[PL/Java](https://tada.github.io/pljava/),
+Built-ins, like
+[PL/PgSQL](https://www.postgresql.org/docs/current/plpgsql.html),
+[PL/Python](https://www.postgresql.org/docs/current/plpython.html), and
+[PL/Perl](https://www.postgresql.org/docs/current/plperl.html). 
+
+Add-ons, like
 [PL/V8](https://github.com/plv8/plv8),
 [PL/R](https://github.com/postgres-plr/plr),
 [PL/Rust](https://github.com/tcdi/plrust), and
