@@ -6,7 +6,20 @@ Calculating distance is a core feature of a spatial database, and the central fu
 * "Which responder is closest to the call?"
 * "How many more miles until the school bus needs routine maintenance?"
 
-Fortunately we all learn how to calculate distance in middle school! The [Pythagorean Theorem](https://en.wikipedia.org/wiki/Pythagorean_theorem) tells us that the square of the hypotenuse of a right triangle is the sum of the squares of the two other sides.
+PostGIS and any other spatial database let you answer these kinds of questions in SQL, using [ST_Distance(geom1, geom2)](https://postgis.net/docs/ST_Distance.html) to return a distance, or [ST_DWithin(geom1, geom2, radius)](https://postgis.net/docs/ST_DWithin.html) to return a true/false result within a tolerance.
+
+```sql
+SELECT ST_Distance(
+  'LINESTRING (150 300, 226 274, 320 280, 370 320, 390 370)'::geometry,
+  'LINESTRING (140 180, 250 230, 350 200, 390 240, 450 200)'::geometry
+);
+```
+
+It all looks very simple, but under the covers there is a lot of machinery around getting a result fast for different kinds of inputs.
+
+## Distance Under the Covers
+
+Distance should be easy! After all, we learn how to calculate distance in middle school! The [Pythagorean Theorem](https://en.wikipedia.org/wiki/Pythagorean_theorem) tells us that the square of the hypotenuse of a right triangle is the sum of the squares of the two other sides.
 
 ![Pythagoras Proof by Rearrangement](https://upload.wikimedia.org/wikipedia/commons/3/39/Animated_gif_version_of_SVG_of_rearrangement_proof_of_Pythagorean_theorem.gif)
 
