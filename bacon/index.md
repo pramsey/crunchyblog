@@ -435,3 +435,16 @@ SELECT * FROM bacon('Gates McFadden');
 * Graph solving problems do not require special external software, you can attack those problems in PostgreSQL using pgRouting or a custom recursive CTE.
 * pgRouting is good for smaller graphs and especially powerful for graphs that are generated dynamically, to reflect changes in data, or changes in the desired graph.
 * Recursive CTEs can handle much larger graphs, but not large traversals of those graphs, as they tend to pile up very large intermediate results that grow with each recursion.
+
+## Pictures
+
+* Kevin Bacon by [Gage Skidmore](https://www.flickr.com/photos/gageskidmore/14781004366/)
+* Bronson Pinchot by Rob DiCaterino
+* Jim Belushi by COD Newsroom
+* Gates McFadden By [Super Festivals](https://commons.wikimedia.org/w/index.php?curid=130047788)
+* Marissa Tomei by Elena Ternovaja
+* Amanda Seyfried by [Glenn Francis](https://commons.wikimedia.org/wiki/User:Toglenn)
+* Steve Martin by [David W Baker](https://commons.wikimedia.org/w/index.php?curid=137841186)
+* Zendaya by [Glenn Francis](https://commons.wikimedia.org/wiki/User:Toglenn)
+* Timothee Chalamet by [Somewhere In Toronto](https://www.flickr.com/photos/terras/30755014688/)
+
