@@ -316,7 +316,7 @@ WHERE other_actor_id = 3154303 -- Timothée Chalamet
 LIMIT 1;
 ```
 
-That's a lot more complex! Because we are writing the traversal by hand, with a relatively blunt instrument, the result is a lot more complex than the pgRouting solution.
+That's a lot more complex! Because we are writing the traversal by hand, with a relatively blunt instrument, the result is a lot more complex than the pgRouting solution. On the other hand, this solution runs in just a few hundred milliseconds, so for the Bacon problem it's clearly superior.
 
 The output `path` array is an ordered list of edges the take us from the start node (Bacon) to the end node (Chalamet).
 
