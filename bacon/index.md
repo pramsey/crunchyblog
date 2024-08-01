@@ -280,7 +280,7 @@ For this particular problem, it turns out that recursive CTE is a great fit. The
 
 The downside of [recursive CTE](https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-RECURSIVE) should be apparent from this example and the documentation. In a world of confusing SQL, recursive CTE SQL is the most confusing of all.
 
-Here's a bare query to run the same search as we ran in pgRouting 
+Here's a bare query to run the same search as we ran in pgRouting:
 
 ```sql
 WITH RECURSIVE bacon_numbers AS (
@@ -316,7 +316,9 @@ WHERE other_actor_id = 3154303 -- Timothée Chalamet
 LIMIT 1;
 ```
 
-The `path` return array is an ordered list of edges the take us from the start node (Bacon) to the end node (Chalamet).
+That's a lot more complex! Because we are writing the traversal by hand, with a relatively blunt instrument, the result is a lot more complex than the pgRouting solution.
+
+The output `path` array is an ordered list of edges the take us from the start node (Bacon) to the end node (Chalamet).
 
 ```
        path        
