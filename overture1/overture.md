@@ -2,7 +2,7 @@
 
 The [Overture Maps](https://overturemaps.org) collection of data is enormous, encompassing over [300 million transportation segments](https://docs.overturemaps.org/guides/transportation/), [2.3 billion building footprints](https://overturemaps.org/overture-buildings-theme-hits-2-3b-buildings-with-addition-of-google-open-buildings-data/), [53 million points of interest](https://docs.overturemaps.org/guides/places/), and a rich collection of cartographic features as well. It is a consistent global data set, but it is intimidatingly large -- what can a person do with such a thing?
 
-Building cartographic products is the obvious thing, but what about the non-obvious. With an analytical engine like PostgreSQL and [Crunchy Bridge for Analytics](https://docs.crunchybridge.com/analytics), what is possible?
+Building cartographic products is the obvious thing, but what about the less obvious. With an analytical engine like PostgreSQL and [Crunchy Bridge for Analytics](https://docs.crunchybridge.com/analytics), what is possible?
 
 How about vehicle routing?
 
@@ -22,7 +22,7 @@ When creating a new cluster, click the drop-down option and select an "Analytics
 
 ![](analytics.png)
 
-Log in to you cluster as `postgres` and enable the spatial analytics extension:
+Log in to your cluster as `postgres` and enable the spatial analytics extension:
 
 ```sql
 SET pgaudit.log TO 'none';
@@ -56,7 +56,7 @@ CREATE FOREIGN TABLE ov_segments ()
     OPTIONS (path 's3://overturemaps-us-west-2/release/2024-08-20.0/theme=transportation/type=segment/*.parquet');
 ```
 
-This SQL does not initiate a download, it creates a "foreign table", which is like a view but where the data is not stored locally to the database server. In this case, of course, the data reside on S3, and nothing has been downloaded yet.
+This SQL does not initiate a download, it creates a "foreign table", similar to a view, but in which the data is not stored locally on the database server. In this case, of course, the data reside on S3, and nothing has been downloaded yet.
 
 So, we do not want to run `SELECT * FROM ov_segments`, for example, because that would download the **entire contents of the collection**. Instead, we should **subset** the download, and because the data are spatially sorted, we can do it efficiently with a spatial filter.
 
@@ -81,14 +81,14 @@ Despite addressing a data collection with 300 million records, the query returns
 
 ## Data Structure
 
-We have transportation segments! Are we ready to start routing? No we are not.
+We have transportation segments! Are we ready to start routing? Not yet.
 
 We have several data structuring tasks to get the data ready for vehicle routing:
 
-* We need to ensure further filter the segments down to those classes that participate in the vehicle network. No paths, no tracks, nothing under construction. 
+* We need to ensure further filter the segments down to those classes that participate in the vehicle network. No paths, no tracks, no segments currently under construction. 
 * We need to convert the speed and road class attribution in Overture to a "cost" for pgRouting to apply to each edge.
 * We need to change the physical structure of the Overture segments to the pure edge/node structure that is used by pgRouting, and identify one-way segments.
-* We need to change the unique Overture UUID identifiers into integers for pgRouting.
+* We need to change the unique Overture UUIDs into integers for pgRouting.
 
 The starting point for data structuring is the Overture `segment` feature, and it is a complex one!
 
@@ -214,11 +214,11 @@ SELECT DISTINCT class, subclass
 
 </details>
 
-And of those many combinations, there are a lot of segments we **do not want**--paths, pedestrian, bridleways, and more!
+And of those many combinations, there are many segments we should **exclude**--paths, pedestrian, bridleways, and more!
 
 ![](segments1.jpg)
 
-Restricting to a few classes--motorway, primary, residential, secondary, tertiary, trunk, unclassified--results in a network that has only vehicle segments.
+By restricting to a few classes--motorway, primary, residential, secondary, tertiary, trunk, unclassified--results in a network that has only vehicle segments.
 
 ![](segments2.jpg)
 
@@ -238,7 +238,7 @@ Many of the segments in our collection of vehicle segments have a speed limit on
      "between": null}],
 ```
 
-For simplicity, in this example we will use the first speed limit we find and apply it to the whole segment. If we were being precise, we would split the segment into one edge for each speed limit.
+For simplicity, we will use the first available speed limit in this example, and apply it to the whole segment. To be more precise, we would split the segment into one edge for each speed limit.
 
 For many segments, there is no speed limit provided, so for those we can use defaults and provide different defaults for different classes: a default speed limit for a trunk road might be 90km/hr, and a default for a residential street might be 40km/hr. 
 
@@ -328,7 +328,7 @@ $$ LANGUAGE 'plpgsql';
 
 One of the strangest aspects of the Overture model is the handling of one-way streets. Most models have a boolean "one way" flag, or maybe a "direction" attribute with "forward", "backward" and "both". 
 
-Overture chooses to model directionality is one in a number of possible "restrictions" on the segment, here's the relevant JSON from our example segment.
+Overture models directionality as one in a number of possible "restrictions" on the segment, here's the relevant JSON from our example segment.
 
 ```json
   "access_restrictions":[{ 
@@ -350,7 +350,7 @@ So every segment has a list of restrictions, and "heading" is one of them, but a
 
 ### Converting from Overture Segments to pgRouting Edges
 
-The trickiest part of preparing the Overture segments for pgRouting is the model transformation between "segments" and "edges".
+The most challenging aspect of preparing the Overture segments for pgRouting is the model transformation between "segments" and "edges".
 
 The pgRouting graph is a simple structure of vertices and edges. Vertices are points and edges are defined as joining two vertics, so any edge can be characterized by stating its "source" and "target" vertex.
 
@@ -472,7 +472,7 @@ $$ LANGUAGE 'plpgsql';
 
 In order to actually run routing on our final data, we are going to need a table of network vertices, so that we can figure what "source" vertex and "target" vertex correspond to a particular pair of routing points.
 
-You would think that the Overture [connector](https://docs.overturemaps.org/schema/reference/transportation/connector/) file would provide an easy way to get those points, but unfortunately I discovered while testing this process that the file is incomplete. Not all of the connectors referenced in the `segments` type appear in the `connectors` type.
+It would seem that the Overture [connector](https://docs.overturemaps.org/schema/reference/transportation/connector/) file would provide an easy method to get those points, but unfortunately I discovered while testing this process that the file is incomplete. Not all of the connectors referenced in the `segments` type appear in the `connectors` type.
 
 Fortunately, there is another place a complete list of connectors appears: in the `connectors` attribute of the `segments`:
 
@@ -512,7 +512,9 @@ CREATE INDEX pgr_connectors_geom_x ON pgr_connectors USING GIST (geometry);
 
 ## Data Processing
 
-I have described a bunch of parts, but not put them together in sequence so far, to process data from cloud based Overture GeoParquet files all the way to tables ready to support pgRouting, so here is the process, roughly:
+I have outlined individual components, but thus far have not yet integrated them into a sequential process to convert raw Overture GeoParquet to pgRouting compatible tables. 
+
+Here is the complete process, roughly:
 
 * Create an FDW table `ov_segments` referencing the raw Overture files online.
 * Pull a local copy of that table, `ov_segments_local`, only for our area of interest.
@@ -527,7 +529,7 @@ All the functions and the overall process are available in the [overture.sql](ov
 
 ## Routing
 
-After all the work, we are ready to route, which should be easy, right? We have pgRouting data ready, with low costs on the fast streets and higher costs on the slow streets.
+After all the work, we are ready to route, which should be straightforward, right? We have pgRouting data ready, with low costs on the fast streets and higher costs on the slow streets.
 
 ![](victoria.jpg)
 
