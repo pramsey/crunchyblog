@@ -508,6 +508,7 @@ CREATE INDEX pgr_connectors_x ON pgr_connectors (connector_id);
 CREATE INDEX pgr_connectors_geom_x ON pgr_connectors USING GIST (geometry);
 ```
 
+</details>
 
 ## Data Processing
 
