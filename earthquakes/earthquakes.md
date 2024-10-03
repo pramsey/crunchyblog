@@ -20,7 +20,7 @@ The first step is to retrieve the feed. The simplest way is to use the [http](ht
 CREATE EXTENSION http;
 ```
 
-The `http_get(url)` function returns an `http_response` return, with a return status, content_type, headers and content. We could write a wrapper to check the return code, but for this example we will just assume the feed works and look at the content.
+The `http_get(url)` function returns an `http_response`, with a status code, content_type, headers and content. We could write a wrapper to check the status code, but for this example we will just assume the feed works and look at the content.
 
 ```sql
 SELECT jsonb_pretty(content::jsonb) 
@@ -48,6 +48,9 @@ One way to iterate through the list would be to write a function in PL/PgSQL, an
         SELECT jsonb_array_elements(response->'features')
     LOOP
         -- Extract properties from the current feature
+        -- here ...
+        -- ...
+        -- and then...
         RETURN NEXT;
 
     END LOOP;
@@ -105,13 +108,13 @@ $$ LANGUAGE 'plpgsql';
 ```
 </details>
 
-However, there is a new (as of PostgreSQL 17) and faster way to process JSON data files, like the USGS earthquakes feed: [JSON_TABLE](https://www.postgresql.org/docs/current/functions-json.html#FUNCTIONS-SQLJSON-TABLE)
+However, there is a new (as of PostgreSQL 17) and faster way to process JSON data files like the USGS earthquakes feed: [JSON_TABLE](https://www.postgresql.org/docs/current/functions-json.html#FUNCTIONS-SQLJSON-TABLE)
 
 ## Reading the Features with JSON_TABLE
 
 [JSON_TABLE](https://www.postgresql.org/docs/current/functions-json.html#FUNCTIONS-SQLJSON-TABLE) is part of the [SQL/JSON](https://www.iso.org/standard/78937.html) standard, and allows users to filter parts of JSON documents using the [JSONPath](https://www.ietf.org/archive/id/draft-goessner-dispatch-jsonpath-00.html) filter language.
 
-The equivalent to the PL/PgSQL function above can be reduced to just one `JSON_TABLE` call.
+The PL/PgSQL function above can be reduced to just one equivalent `JSON_TABLE` call.
 
 ```sql
 -- Download the GeoJSON feed from USGS 
