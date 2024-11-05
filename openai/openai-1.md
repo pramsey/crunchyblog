@@ -12,7 +12,7 @@ Amazingly, you can do **either** approach, and use the same access API to hit th
 
 ## Access Extension
 
-Knowing this, it makes sense to build a basic OpenAI API access extension in PostgreSQL to make using the API quick and easy. The extension we built for this post has three functions:
+Knowing this, it makes sense to build a basic [OpenAI API access extension](https://github.com/pramsey/pgsql-openai) in PostgreSQL to make using the API quick and easy. The extension we built for this post has three functions:
 
 * openai.models() returns a list of models being served by the API
 * openai.prompt(context text, prompt text) returns the text answer to the prompt, evaluated using the context.
@@ -23,7 +23,7 @@ The OpenAI API just accepts JSON queries over HTTP and returns JSON responses, s
 There are two ways to get the extension functions:
 
 * You can install the extension if you have system access to your database. 
-* Or you can just load the `openai--1.0.sql` file, since it is 100% PL/PgSQL code. Just remember to `CREATE EXTENSION http` first, because the API extension depends on the [http extension](https://github.com/pramsey/pgsql-http).
+* Or you can just load the [openai--1.0.sql](https://github.com/pramsey/pgsql-openai/blob/main/openai--1.0.sql) file, since it is 100% PL/PgSQL code. Just remember to `CREATE EXTENSION http` first, because the API extension depends on the [http extension](https://github.com/pramsey/pgsql-http).
 
 
 ## Local or Remote
@@ -46,8 +46,8 @@ Using a local [Ollama](https://ollama.com) model is also pretty easy.
 
 * Download [Ollama](https://ollama.com).
 * Verify you can run `ollama` 
-	* then `ollama pull llama3.1:latest`
-	* and `ollama pull mxbai-embed-large`
+    * then `ollama pull llama3.1:latest`
+    * and `ollama pull mxbai-embed-large`
 
 * Set the up the session keys
 
