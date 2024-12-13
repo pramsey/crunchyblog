@@ -22,8 +22,8 @@ INSERT INTO addresses (address, city)
 -- loop through that list and call geocode(pk)
 -- geocode(pk) use http to call google api
 
-SET gmaps.api_key = 'AIzaSyAZNxVr6T9KH_yTS7s8e1xQ1DzqxR4xn9c';
-ALTER DATABASE http SET gmaps.api_key = 'AIzaSyAZNxVr6T9KH_yTS7s8e1xQ1DzqxR4xn9c';
+SET gmaps.api_key = '***';
+ALTER DATABASE http SET gmaps.api_key = '***';
 
 --
 -- Take a primary key for a row, get the address string
