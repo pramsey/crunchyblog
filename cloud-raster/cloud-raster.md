@@ -215,17 +215,17 @@ So how do we get an elevation value from this collection of reference tiles? Eas
 WITH pt AS (
   SELECT ST_Transform(
     ST_Point(-79.3832, 43.6532, 4326), 
-    3978) AS yyz 
+    3978) AS toronto 
 )
 -- Find the raster tile of interest, 
 -- and read the value of band one (there is only one band)
 -- at that point.
 SELECT 
-  ST_Value(rast, 1, yyz, resample => 'bilinear') AS elevation,
-  yyz AS geom 
+  ST_Value(rast, 1, toronto, resample => 'bilinear') AS elevation,
+  toronto AS geom 
 FROM 
   mrdem30, pt  
-WHERE ST_Intersects(ST_ConvexHull(rast), yyz);
+WHERE ST_Intersects(ST_ConvexHull(rast), toronto);
 ```
 
 Note that we are using "[bilinear interpolation](https://en.wikipedia.org/wiki/Bilinear_interpolation)" in [ST_Value()](https://postgis.net/docs/RT_ST_Value.html), so if our point falls between pixel values, the value we get is interpolated in between the pixel values.
