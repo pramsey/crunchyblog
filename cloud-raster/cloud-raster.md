@@ -1,6 +1,6 @@
-# Accessing Cloud Rasters with PostGIS Raster
+# Using Cloud Rasters with PostGIS
 
-Using the `postgis_raster` extension, it is possible to access gigabytes of raster data from the cloud, without ever downloading the data. 
+With the `postgis_raster` extension, it is possible to access gigabytes of raster data from the cloud, **without ever downloading the data**. 
 
 How? The venerable `postgis_raster` extension (released [13 years ago](https://www.postgresql.org/about/news/postgis-200-released-1387/)) already has the critical core support built-in! 
 
@@ -21,7 +21,7 @@ CREATE EXTENSION postgis_raster;
 
 ### Investigate The Data
 
-Finding some COG data is the hardest part. Here is a [56GB COG of medium resolution (25m) elevation data for Canada](https://open.canada.ca/data/en/dataset/18752265-bda3-498c-a4ba-9dfe68cb98da). **Don't try and download it, it's 56GB!**
+COG is still a new format for public agencies, so finding a large public example can be tricky. Here is a [56GB COG of medium resolution (25m) elevation data for Canada](https://open.canada.ca/data/en/dataset/18752265-bda3-498c-a4ba-9dfe68cb98da). **Don't try and download it, it's 56GB!**
 
 ![MrDEM for Canada](mrdem.jpg)
 
@@ -106,9 +106,9 @@ Band 1 Block=512x512 Type=Float32, ColorInterp=Gray
 
 </details>
 
-The key things we need to take from the metadata is that 
+The key things we need to take from the metadata are that:
 
-* the spatial reference system is "NAD83(CSRS) / Canada Atlas Lambert", "EPSG:3979", and
+* the spatial reference system is "NAD83(CSRS) / Canada Atlas Lambert", "EPSG:3979"; and,
 * the blocking (tiling) is 512x512 pixels.
 
 ### Load The Database Table
@@ -129,10 +129,10 @@ With this metadata in hand, we are ready to load a **reference** to the remote d
 
 That is a lot of flags! What do they mean?
 
-* **-R** means store references, so the pixel data is not copied into the database
-* **-k** means do not skip tiles that are all NODATA values. While it would be nice to skip NODATA tiles, doing so involves reading all the pixel data, which is exactly what we are trying to avoid.
-* **-s 3979** means that the projection of our data is **EPSG:3979**, the value we got from the metadata.
-* **-t 512x512** means to create tiles with 512x512 pixels, so that the blocking of the tiles in our database matches the blocking of the remote file. This should help lower the number of network read requests any given data request requires.
+* **-R** means store references, so the pixel data is not copied into the database.
+* **-k** means do not skip tiles that are all NODATA values. While it would be nice to skip NODATA tiles, doing so involves reading **all** the pixel data, which is exactly what we are trying to avoid.
+* **-s 3979** means that the projection of our data is [EPSG:3979](https://epsg.io/3979), the value we got from the metadata.
+* **-t 512x512** means to create tiles with 512x512 pixels, so that the blocking of the tiles in our database matches the blocking of the remote file. This should help lower the number of network reads any given data request requires.
 * **-Y 1000** means to use `COPY` mode when writing out the tile definitions, and to write out batches of 1000 rows in each `COPY` block.
 * Then the URL to the cloud GeoTIFF we are referencing, with `/vsicurl/` at the front to indicate using the "curl [virtual file system](https://gdal.org/en/stable/user/virtual_file_systems.html)". 
 * Then the table name (`mrdem30`) we want to use in the database.
@@ -157,6 +157,8 @@ CREATE INDEX mrdem30_st_convexhull_idx
   ON mrdem30 USING GIST (ST_ConvexHull(rast));
 ```
 
+This index will speed up raster tile lookup need when we are spatially querying.
+
 ### Query The Data
 
 The single MrDEM GeoTIFF data set is now represented in the database as a table of raster tiles.
@@ -167,7 +169,7 @@ SELECT count(*) FROM mrdem30;
 
 There are **112008** tiles in the collection. 
 
-Each tile is pretty big, spatially (512 pixels on a side, 25 meters per pixel).
+Each tile is pretty big, spatially (512 pixels on a side, 25 meters per pixel, means a 12.8km tile).
 
 ![MrDEM Tiles](mrdem-tiles.jpg)
 
@@ -194,7 +196,7 @@ SELECT ST_AsText(ST_ConvexHull(rast))
 ```
 POLYGON((-2054640 -367320,-2039280 -367320,-2039280 -382680,-2054640 -382680,-2054640 -367320))
 ```
-Just like geometries, raster tiles have a spatial reference id associated with them, in the case a projection that makes sense for a Canada-wide raster.
+Just like geometries, raster tiles have a spatial reference id associated with them, in this case a projection that makes sense for a Canada-wide raster.
 ```sql
 SELECT ST_SRID(rast)
   FROM mrdem30 OFFSET 50000 LIMIT 1;
@@ -226,6 +228,8 @@ FROM
 WHERE ST_Intersects(ST_ConvexHull(rast), yyz);
 ```
 
+Note that we are using "[bilinear interpolation](https://en.wikipedia.org/wiki/Bilinear_interpolation)" in [ST_Value()](https://postgis.net/docs/RT_ST_Value.html), so if our point falls between pixel values, the value we get is interpolated in between the pixel values.
+
 
 ### Query a Larger Geometry
 
@@ -244,16 +248,16 @@ What about something bigger? How about the flight line of a plane going from Vic
 CREATE TABLE flight AS 
 WITH 
 end_pts AS (
-  SELECT ST_Point(-123.3656, 48.4284, 4326) AS yyj,
-         ST_Point(-114.0719, 51.0447, 4326) AS yyc
+    SELECT ST_Point(-123.3656, 48.4284, 4326) AS yyj,
+           ST_Point(-114.0719, 51.0447, 4326) AS yyc
 ),
 -- Construct line and add vertex every 10KM along great circle
 -- Reproject to coordinate system of rasters
 ln AS (
-  SELECT ST_Transform(ST_Segmentize(
-    ST_MakeLine(end_pts.yyj, end_pts.yyc)::geography, 
-    10000)::geometry, 3978) AS geom
-  FROM end_pts
+    SELECT ST_Transform(ST_Segmentize(
+        ST_MakeLine(end_pts.yyj, end_pts.yyc)::geography, 
+        10000)::geometry, 3978) AS geom
+    FROM end_pts
 ),
 rast AS (
     SELECT ST_Union(rast) AS r
@@ -262,13 +266,13 @@ rast AS (
 ),
 -- Add Z values to that line
 zln AS (
-  SELECT ST_SetZ(rast.r, ln.geom) AS geom
-  FROM rast, ln
+    SELECT ST_SetZ(rast.r, ln.geom) AS geom
+    FROM rast, ln
 ),
 -- Dump the points of the line for the graph
 zpts AS (
-  SELECT (ST_DumpPoints(geom)).*
-  FROM zln
+    SELECT (ST_DumpPoints(geom)).*
+    FROM zln
 )
 SELECT geom, ST_Z(geom) AS elevation
 FROM zpts;
@@ -285,11 +289,11 @@ How is it possible to read the values off of a 56GB GeoTIFF file without every d
 
 ### Cloud Optimized GeoTIFF
 
-The difference between a "cloud GeoTIFF" and a "local GeoTIFF" is most a difference in how software accesses the data. 
+The difference between a "cloud GeoTIFF" and a "local GeoTIFF" is mostly a difference in how software accesses the data. 
 
-* A local GeoTIFF probably resides on an SSD or some other storage that has fast random access. Also, each small read will be very fast, because the communication between CPU and storage medium is all local.
+* A local GeoTIFF probably resides on an SSD or some other storage that has fast random access. Small random reads will be fast, and so will large sequential reads. Local access is fast!
 
-* A cloud GeoTIFF resides on an "object store", a remote API that allows clients to real all of a file (with an HTTP "[GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET)") or part of a file (with an HTTP "[RANGE](https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests)"). Each read is quite slow, because the read involves setting up an HTTP connection (slow) and then transmitting the data over an internetwork (slow). The more reads you do, the worse performance get. To the core goal of a "cloud format" is to reduce the number of reads.
+* A cloud GeoTIFF resides on an "object store", a remote API that allows clients to real all of a file (with an HTTP "[GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET)") or part of a file (with an HTTP "[RANGE](https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests)"). Each random read is quite slow, because the read involves setting up an HTTP connection (slow) and then transmitting the data over an internetwork (slow). The more reads you do, the worse performance get. So the core goal of a "cloud format" is to reduce the number of reads required to access a subset of the data.
 
 Reading multi-gigabyte raster files from object storage is a relatively new idea, formalized only a couple years ago in the [cloud optimized GeoTIFF](https://cogeo.org) (aka **COG**) specification.
 
