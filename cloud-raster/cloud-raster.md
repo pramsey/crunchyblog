@@ -6,7 +6,7 @@ How? The venerable `postgis_raster` extension (released [13 years ago](https://w
 
 Rasters can be stored inside the database, or outside the database, on a local file system **or** anywhere it can be accessed by the underlying [GDAL](https://gdal.org) raster support library. The [storage options](https://gdal.org/en/stable/user/virtual_file_systems.html#network-based-file-systems) include S3, Azure, Google, Alibaba, and any HTTP server that supports [RANGE requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests). 
 
-As long as the rasters are in the [cloud optimized GeoTIFF](https://cogeo.org) (aka "COG") format, the network access to the data will be optimized and provide access performance limited mostly be the speed of connection between your database server and the cloud storage.
+As long as the rasters are in the [cloud optimized GeoTIFF](https://cogeo.org) (aka "COG") format, the network access to the data will be optimized and provide access performance limited mostly by the speed of connection between your database server and the cloud storage.
 
 ## TL;DR It Works
 
@@ -309,7 +309,7 @@ Forcing tiling means that pixels that are near each other in space are also near
 
 ### GDAL Virtual File Systems
 
-While a "cloud optimized" format like COG or GeoParquet is cool, it is not going to be a useful cloud format without a client library that knows how to efficiently read the file. The client needs to native to the application, and it needs to be parsimonious in the number of file accesses it makes. 
+While a "cloud optimized" format like COG or GeoParquet is cool, it is not going to be a useful cloud format without a client library that knows how to efficiently read the file. The client needs to be native to the application, and it needs to be parsimonious in the number of file accesses it makes. 
 
 For a web application, that means that COG access requires a JavaScript library that understands the GeoTIFF format.
 
