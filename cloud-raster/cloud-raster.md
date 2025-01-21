@@ -21,7 +21,7 @@ CREATE EXTENSION postgis_raster;
 
 ### Investigate The Data
 
-COG is still a new format for public agencies, so finding a large public example can be tricky. Here is a [56GB COG of medium resolution (25m) elevation data for Canada](https://open.canada.ca/data/en/dataset/18752265-bda3-498c-a4ba-9dfe68cb98da). **Don't try and download it, it's 56GB!**
+COG is still a new format for public agencies, so finding a large public example can be tricky. Here is a [56GB COG of medium resolution (30m) elevation data for Canada](https://open.canada.ca/data/en/dataset/18752265-bda3-498c-a4ba-9dfe68cb98da). **Don't try and download it, it's 56GB!**
 
 ![MrDEM for Canada](mrdem.jpg)
 
@@ -169,7 +169,7 @@ SELECT count(*) FROM mrdem30;
 
 There are **112008** tiles in the collection. 
 
-Each tile is pretty big, spatially (512 pixels on a side, 25 meters per pixel, means a 12.8km tile).
+Each tile is pretty big, spatially (512 pixels on a side, 30 meters per pixel, means a 15km tile).
 
 ![MrDEM Tiles](mrdem-tiles.jpg)
 
