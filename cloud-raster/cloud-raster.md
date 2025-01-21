@@ -17,6 +17,12 @@ Set up a database named `raster`  with the `postgis` and `postgis_raster` extens
 ```sql
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_raster;
+
+ALTER DATABASE raster 
+  SET postgis.gdal_enabled_drivers TO 'GTiff';
+
+ALTER DATABASE raster 
+  SET postgis.enable_outdb_rasters TO true;
 ```
 
 ### Investigate The Data
