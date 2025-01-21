@@ -202,7 +202,7 @@ SELECT ST_SRID(rast)
   FROM mrdem30 OFFSET 50000 LIMIT 1;
 ```
 ```
-3978
+3979
 ```
 
 ### Query Elevation
@@ -215,7 +215,7 @@ So how do we get an elevation value from this collection of reference tiles? Eas
 WITH pt AS (
   SELECT ST_Transform(
     ST_Point(-79.3832, 43.6532, 4326), 
-    3978) AS toronto 
+    3979) AS toronto 
 )
 -- Find the raster tile of interest, 
 -- and read the value of band one (there is only one band)
@@ -256,7 +256,7 @@ end_pts AS (
 ln AS (
     SELECT ST_Transform(ST_Segmentize(
         ST_MakeLine(end_pts.yyj, end_pts.yyc)::geography, 
-        10000)::geometry, 3978) AS geom
+        10000)::geometry, 3979) AS geom
     FROM end_pts
 ),
 rast AS (
