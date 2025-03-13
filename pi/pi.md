@@ -40,7 +40,7 @@ How does this help us get to _pi_ though? Well, PostGIS has a moderate amount of
 
 ![](circle.png)
 
-So, what is an arc that starts and ends at the same point? A circle!
+So, what is an arc that starts and ends at the same point? A circle! This is the unit circle -- a circle of radius one centered on the origin -- expressed as a `CIRCULARSTRING`.
 
 ```sql
 SELECT ST_Length('CIRCULARSTRING(1 0, -1 0, 1 0)') / 2;
