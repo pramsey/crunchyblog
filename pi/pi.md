@@ -2,7 +2,7 @@
 
 What's your favourite infinite sequence of non-repeating digits? There are some people who make a case for _e_, but to my mind nothing beats the transcendental and curvy utility of _pi_, the ratio of a circle's circumference to its diameter.
 
-Drawing circles a simple thing to do in PostGIS, just take a point, and buffer it. The result is circular, and we can calculate an estimate of _pi_ just by measuring the perimeter of the unit circle.
+Drawing circles is a simple thing to do in PostGIS -- take a point, and buffer it. The result is circular, and we can calculate an estimate of _pi_ just by measuring the perimeter of the unit circle.
 
 ```sql
 SELECT ST_Buffer('POINT(0 0)', 1.0);
@@ -10,7 +10,7 @@ SELECT ST_Buffer('POINT(0 0)', 1.0);
 
 ![](buffer_default.png)
 
-Except, look a little more closely, this "circle" seems to be made up of short straight lines. What is the ratio of its circumference to its diameter?
+Except, look a little more closely -- this "circle" seems to be made up of short straight lines. What is the ratio of its circumference to its diameter?
 
 ```sql
 SELECT ST_Perimeter(ST_Buffer('POINT(0 0)', 1.0)) / 2;
@@ -18,7 +18,7 @@ SELECT ST_Perimeter(ST_Buffer('POINT(0 0)', 1.0)) / 2;
 ```
 3.1365484905459406
 ```
-That's **close** to _pi_, but it's **not** pi. Can we generate a better approximation? What if we make the edges even shorter?
+That's **close** to _pi_, but it's **not** pi. Can we generate a better approximation? What if we make the edges even shorter? The third parameter to `ST_Buffer()` is the "quadsegs", the number of segments to build each quadrant of the circle.
 
 ```sql
 SELECT ST_Perimeter(ST_Buffer('POINT(0 0)', 1.0, quadsegs => 128)) / 2;
