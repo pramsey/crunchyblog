@@ -38,6 +38,8 @@ The circular arc above is the arc that starts at A and ends at C, passing throug
 
 How does this help us get to _pi_ though? Well, PostGIS has a moderate amount of support for circular arc geometry, so if we construct a circle using "natively curved" objects, we should get an exact representation of a circle rather than an approximation.
 
+![](circle.png)
+
 So, what is an arc that starts and ends at the same point? A circle!
 
 ```sql
