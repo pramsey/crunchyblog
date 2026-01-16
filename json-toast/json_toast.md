@@ -76,7 +76,7 @@ A query to find all the JSON documents that have a `item_name` starting with 'a'
 ```sql
 SELECT count(*) 
   FROM json_40
- WHERE json->>'item_name' ~ '^a';
+ WHERE json->>'item_name' LIKE 'a%';
 ```
 
 So far, so good. 
@@ -115,7 +115,7 @@ But the number of rows in the table is the same, just 10000! What kind of perfor
 ```sql
 SELECT count(*) 
   FROM json_40000
- WHERE json->>'item_name' ~ '^a';
+ WHERE json->>'item_name' LIKE 'a%';
 ```
 
 Ack! A **brutal 500 ms** to scan these 10000 rows! That's **40 times slower**, what is happening?
@@ -132,25 +132,33 @@ In order to check the value of `item_name` in the JSON object, the database firs
 Once the object is rebuilt and decompressed, only **then** can the database read the `item_name` and check the first character.
 
 
-## Best Practices
+## Best Practices to Avoid the Toast Tax
 
 So how do you **avoid** the TOAST tax? Avoid accessing the **whole object** unless you really need to. 
 
+### Put Common Fields into Table Columns
+
 In this example, when we ingested the JSON object we used a generated column to read the `item_name` value and put it in the `name` column of the table. 
 
-Queries that filter on that tiny `name` column do not pay the TOAST tax and take only **5 ms**.
+As a general rule, using table columns for the predictable parts of your documents allows the database to perform much more efficiently than reaching into the JSONB object every time it needs to read a common column value.
+
+In our example, queries that filter on that tiny `name` column do not pay the TOAST tax and take only **5 ms**. Reading big objects is slow -- reading small ones is fast.
 
 ```sql
 SELECT count(*) 
   FROM json_40000
- WHERE name ~ '^a';
+ WHERE name LIKE 'a%';
 ```
 
-In general, this is the best way to avoid the TOAST tax: ensure the keys you care about are pulled out into real columns during JSON ingest. 
+In general, this is the **best way to avoid the TOAST tax** -- ensure the keys you care about are pulled out into real columns during JSON ingest. 
 
 Note that for our examples, we used `GENERATED ALWAYS` and `STORED` on our generated columns, to ensure that the columns are always in sync to the JSONB document and they can be efficiently read and indexed.
 
-For columns you do not want to split out explicitly, you can still quickly search them by creating a functional index on their values.
+### Functionally Index the Values in the Document
+
+An alternative way to avoid reading the full JSON document when filtering is to index the piece of the document you are searching on, using a "[functional index](https://www.postgresql.org/docs/current/indexes-expressional.html)". 
+
+Functional indexes allow you to index any expression, allowing the planner to use the index when the expression occurs in the SQL `WHERE` clause. In our case, we want to index the expression that reaches into the JSON document and pulls out the `item_name`.
 
 ```
 CREATE INDEX json_40000_name_x 
@@ -158,8 +166,10 @@ CREATE INDEX json_40000_name_x
 
 SELECT count(json->>'item_name') 
   FROM json_40000
- WHERE json->>'item_name' ~ '^a';
+ WHERE json->>'item_name' LIKE 'a%';
 ```
 
-Querying on the functional index takes **80 ms** which is *faster* than **500 ms** but still *slower* than the direct filter on the `name` column, because the query plan is re-applying the filter after the index scan, which means the 983 rows that passed the filter still pay the TOAST tax.
+Querying on the functional index takes **80 ms** which is *faster* than **500 ms** but still *slower* than the direct filter on the `name` column. There is not a free lunch here, because re-applying the filter after the index scan, which means the 983 rows that passed the filter still pay the TOAST tax.
+
+When we used a table column, the full JSONB document was read **zero** times, since the column of interest was already available in the table.
 
